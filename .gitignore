@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Runtime event storage
+/data/
+!.env.example
+
+# Generated season plan PDF
+/public/sessionsplan.pdf
+
+.agents/
+.codex/
+.impeccable/

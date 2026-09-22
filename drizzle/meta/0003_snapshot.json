@@ -1,0 +1,125 @@
+{
+  "id": "bdb1018d-b566-4111-be0c-49dae455eeb5",
+  "prevId": "9bedb203-4d40-4785-b7ff-3d70386f6c9a",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.events": {
+      "name": "events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time": {
+          "name": "time",
+          "type": "time(0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "published": {
+          "name": "published",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "events_chronological": {
+          "name": "events_chronological",
+          "columns": [
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "time",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "events_title_length": {
+          "name": "events_title_length",
+          "value": "char_length(btrim(\"events\".\"title\")) BETWEEN 1 AND 120"
+        },
+        "events_season_date": {
+          "name": "events_season_date",
+          "value": "\"events\".\"date\" BETWEEN DATE '2026-09-01' AND DATE '2027-08-31'"
+        },
+        "events_minute_time": {
+          "name": "events_minute_time",
+          "value": "EXTRACT(SECOND FROM \"events\".\"time\") = 0"
+        },
+        "events_location_length": {
+          "name": "events_location_length",
+          "value": "char_length(btrim(\"events\".\"location\")) BETWEEN 1 AND 180"
+        },
+        "events_description_length": {
+          "name": "events_description_length",
+          "value": "char_length(\"events\".\"description\") <= 2000"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
