@@ -104,7 +104,10 @@ export async function saveEventAction(input: unknown) {
       await createEvent(eventSchema.parse(parsed.data));
     }
     updateTag(EVENTS_CACHE_TAG);
-    return { ok: true as const, events: await refreshEventsAndPdf() };
+    const events = await refreshEventsAndPdf();
+    // Again after the upload, so a request made during it can't cache a missing PDF.
+    updateTag(EVENTS_CACHE_TAG);
+    return { ok: true as const, events };
   } catch (error) {
     console.error("Event save failed:", error);
     return {
@@ -128,7 +131,10 @@ export async function deleteEventAction(input: unknown) {
         error: "Dieser Termin existiert nicht mehr. Bitte lade die Seite neu.",
       };
     updateTag(EVENTS_CACHE_TAG);
-    return { ok: true as const, events: await refreshEventsAndPdf() };
+    const events = await refreshEventsAndPdf();
+    // Again after the upload, so a request made during it can't cache a missing PDF.
+    updateTag(EVENTS_CACHE_TAG);
+    return { ok: true as const, events };
   } catch (error) {
     console.error("Event delete failed:", error);
     return {

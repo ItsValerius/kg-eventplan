@@ -21,7 +21,9 @@ export async function hasSessionPlanPdf() {
     await head(SESSION_PLAN_BLOB_PATHNAME);
     return true;
   } catch (error) {
-    if (error instanceof BlobNotFoundError) return false;
-    throw error;
+    // The PDF button is optional; any Blob failure just hides it.
+    if (!(error instanceof BlobNotFoundError))
+      console.error("Sessionsplan-PDF konnte nicht geprüft werden:", error);
+    return false;
   }
 }

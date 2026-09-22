@@ -7,7 +7,7 @@ import { downloadCalendar } from "@/lib/calendar";
 import { Icon } from "./icons";
 import { de } from "date-fns/locale";
 
-const sessionMonths = ["2026-11", "2026-12", "2027-01", "2027-02"];
+const coreSessionMonths = ["2026-11", "2026-12", "2027-01", "2027-02"];
 
 function toLocalDate(value: string) {
   const [year, month, day = 1] = value.split("-").map(Number);
@@ -36,6 +36,10 @@ export default function SeasonCalendar({
     focusTarget.current = null;
   }, [month]);
   const eventDates = events.map((event) => toLocalDate(event.date));
+  // Always offer the core session months, plus any month outside them that has events.
+  const sessionMonths = [
+    ...new Set([...coreSessionMonths, ...events.map((e) => e.date.slice(0, 7))]),
+  ].sort();
   const filtered = events.filter(
     (event) => !month || event.date.startsWith(month),
   );
