@@ -1,4 +1,5 @@
 import { z } from "zod";
+export { formatDate } from "./format";
 
 const dateSchema = z
   .string({ error: "Bitte gib ein gültiges Datum ein." })
@@ -136,12 +137,6 @@ export function sortEvents(events: ClubEvent[]) {
   return [...events].sort((a, b) =>
     `${a.date}T${a.time ?? "24:00"}`.localeCompare(`${b.date}T${b.time ?? "24:00"}`),
   );
-}
-export function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
-  return new Intl.DateTimeFormat("de-DE", {
-    ...options,
-    timeZone: "Europe/Berlin",
-  }).format(new Date(`${date}T12:00:00Z`));
 }
 export function validateEvent(value: unknown): Omit<ClubEvent, "id"> {
   const result = eventSchema.safeParse(value);

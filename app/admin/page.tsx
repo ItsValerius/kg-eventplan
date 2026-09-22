@@ -16,7 +16,7 @@ export default function AdminPage() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-[1280px] px-12 max-lg:px-[30px] max-md:px-5 max-[370px]:px-[15px] min-[1500px]:max-w-[1360px] min-h-[calc(100vh-212px)] pt-14 pb-[70px] max-md:pt-[34px] max-md:pb-[45px]"
+        className="mx-auto max-w-7xl px-12 max-lg:px-7.5 max-md:px-5 max-[370px]:px-3.75 min-[1500px]:max-w-340 min-h-[calc(100vh-212px)] pt-14 pb-17.5 max-md:pt-8.5 max-md:pb-11.25"
       >
         <Suspense fallback={<p role="status">Terminverwaltung wird geladen …</p>}>
           <AdminContent />

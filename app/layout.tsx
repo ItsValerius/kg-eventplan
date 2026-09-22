@@ -3,13 +3,13 @@ import localFont from "next/font/local";
 import "./globals.css";
 
 const display = localFont({
-  src: "../public/fonts/barlow-condensed-bold.ttf",
+  src: "../public/fonts/barlow-condensed-bold.woff2",
   variable: "--font-barlow",
   display: "swap",
 });
 const title = "Sessionsplan 2026/2027 | Knallköpp Golkrath";
 const description =
-  "Die Karnevalssession der KG Knallköpp Golkrath: Veranstaltungen, Termine und gemeinsame Vorfreude auf 2026/2027.";
+  "Alle Termine der KG Knallköpp Golkrath für die Karnevalssession 2026/2027.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sessionsplan.knallkoepp-golkrath.de"),

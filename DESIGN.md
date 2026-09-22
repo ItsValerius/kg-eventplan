@@ -10,7 +10,8 @@ colors:
   wash: "#f5f7f2"
   line: "#dce3d9"
   white: "#fff"
-  field-border: "#b8c4b4"
+  field-border: "#7f8e7c"
+  open-row: "#fafcf7"
   focus: "#439537"
   error-bg: "#fff0eb"
   error-ink: "#9a3524"
@@ -90,11 +91,16 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.field}"
     padding: "12px"
-  month-selected:
-    backgroundColor: "{colors.pale}"
-    textColor: "{colors.green-dark}"
+  month-tile:
+    backgroundColor: "{colors.wash}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.field}"
-    padding: "13px 14px"
+    padding: "0 14px"
+  month-tile-empty:
+    backgroundColor: "{colors.white}"
+    textColor: "{colors.muted}"
+  next-date:
+    textColor: "{colors.green}"
   form-panel:
     backgroundColor: "{colors.wash}"
     rounded: "{rounded.panel}"
@@ -132,13 +138,13 @@ Club green carries recognition and action; cool white and green-tinted neutrals 
 ### Neutral
 - **White:** page and field surfaces.
 - **Ink / Muted:** primary text and supporting metadata.
-- **Wash / Line:** quiet form panels, hover surfaces and thin row dividers. Fields use the stronger field-border tone.
+- **Wash / Line:** quiet form panels, hover surfaces and thin row dividers. Fields, checkboxes and the scrollbar use the stronger field-border tone, which keeps input outlines at 3:1 or more against white and wash (WCAG 1.4.11).
 
 **The Green Action Rule.** Use club green for primary actions and active navigation; pale green identifies selected or successful states.
 
 ## Typography
 
-**Display Font:** locally served Barlow Condensed Bold, with sans-serif fallback.
+**Display Font:** locally served Barlow Condensed Bold (woff2 for the web; the TTF remains for the PDF and social images), with sans-serif fallback.
 **Body Font:** Arial, Helvetica, sans-serif.
 
 The display face supplies dense, cheerful weight while the body face makes labels and details practical. This is an observed role hierarchy, not a mathematical modular scale.
@@ -149,7 +155,7 @@ The display face supplies dense, cheerful weight while the body face makes label
 - **Date:** public day numerals use the date role, reducing to 39px on mobile; administration dates use 35px. The public hero states the complete season title in the display face.
 - **Title:** public event titles use the title role, reducing to 18px on mobile. Admin titles use 16px, reducing to 15px.
 - **Body:** global body uses the frontmatter body role; event details use 13px with 1.75 line-height and a 65ch measure.
-- **Label:** buttons use the label role; field labels use 12px and compact event metadata uses 11px. Status badges are compact annotations, not a general text size.
+- **Label:** buttons use the label role; field labels and admin row metadata use 12px. 11px is the floor for all text: weekdays, month abbreviations, column headers and status badges.
 
 **The Date Rhythm Rule.** Keep calendar dates aligned in a dedicated leading column and use tabular numerals for public date values and month counts.
 
@@ -157,9 +163,9 @@ The display face supplies dense, cheerful weight while the body face makes label
 
 The shared shell is centered with a 1280px maximum width and 48px side padding. At 1500px and above the maximum grows to 1360px. At 1000px and below gutters become 30px, and at 700px and below 20px. On the overview, the club crest and call sit directly beside the season headline without a separate header bar.
 
-The public desktop agenda uses a 300px session-month rail, a flexible event column and a 48px gap; the intermediate layout uses 270px and 32px. At 700px the month overview moves above the agenda. Public date, title and disclosure remain aligned while time and venue stack. Desktop event rows use 22px vertical padding; mobile uses 20px.
+The public desktop agenda uses a 300px session-month rail, a flexible event column and a 48px gap; the intermediate layout uses 270px and 32px. From 700px up the rail is sticky. At 700px the month overview moves above the agenda, and the month view shows only the caption and arrows so the events follow directly. Public date, title and disclosure remain aligned while time and venue stack. Desktop event rows use 22px vertical padding; mobile uses 20px.
 
-Administration reuses the shell and date-led rows. The desktop list allocates flexible event information plus 190px status and 100px actions; intermediate widths use 135px and 90px. Mobile places status below event information and stacks actions at the right. Forms use two columns with a 20px gap; on mobile the venue field spans both columns while date and time remain paired. Native date/time appearance follows browser locale.
+Administration reuses the shell and date-led rows. Rows are grouped under the same month headings as the public agenda. The desktop list allocates flexible event information plus 190px status and 110px actions; intermediate widths use 135px and 100px. Mobile places status below event information and stacks actions at the right. Icon actions are 44px squares. Editing opens the form directly under its row; a new event opens the form above the list. Forms use two columns with a 20px gap: title, venue and description span both columns while date and time stay paired. Native date/time appearance follows browser locale.
 
 ## Elevation & Depth
 
@@ -177,10 +183,10 @@ Small rectangular controls use restrained corners: field and month-selection rou
 Confident, compact controls. Primary and outline variants share a 45px minimum height, inline icon gap of 12px and the frontmatter padding. Primary hover deepens the green; outline hover uses wash with a stronger border. Text actions use green, no fill and an underline on hover. Danger is a distinct filled delete action. Disabled buttons fade to 0.55 opacity and use a wait cursor. Preserve meaningful labels alongside SVG icons.
 
 ### Inputs / Fields
-White fields have a fine field-border stroke, field rounding and 12px padding; edit inputs have a 46px minimum height. Keyboard focus is a 3px green outline offset by 4px. Error feedback uses the error pair; success uses pale green and deep green. Native selectors and date/time controls retain their platform behavior.
+White fields have a fine field-border stroke, field rounding and 12px padding; edit inputs have a 46px minimum height. Keyboard focus is a 3px green outline offset by 4px on every control; the resting outline colour is also green, so colour transitions never flash ink. Error feedback uses the error pair; success uses pale green and deep green. Native selectors and date/time controls retain their platform behavior.
 
 ### Navigation
-The overview integrates the club crest and call into the hero. Administration remains available at `/admin`. The public filter rail initially shows November 2026 through February 2027 as four square month tiles. The agenda shows the complete session by default. Selecting a tile replaces the overview with that month’s full calendar and filters the list; calendar navigation stays within those four months, and a control returns to the month overview and all events.
+The overview integrates the club crest and call into the hero. Administration remains available at `/admin`. The public filter rail initially shows November 2026 through February 2027 as four 56px month tiles, each with its event count in the display face; months without events use the quiet empty tile. The agenda shows only upcoming events; past events stay reachable through the month tiles, where a month view lists all of that month’s events with past ones muted. Empty states name their case in one line: no events yet, an empty month (future or past tense), no further dates yet, or the session is over. The session ends on Aschermittwoch (10 February 2027). Selecting a tile replaces the overview with that month’s full calendar and filters the list. Only event days are active in the calendar: they are filled pale green, and selecting one opens and scrolls to its row. Today carries a field-border ring; calendar navigation stays within those four months, and a control returns to the month overview and all events.
 
 ### Chips
 Admin publication badges use pale green for published dates and the neutral wash for drafts, with compact padding and tag rounding. They are labels, not filter buttons.
@@ -189,7 +195,7 @@ Admin publication badges use pale green for published dates and the neutral wash
 The form panel is a wash-filled, line-bordered container with panel rounding, 30px edit-form padding and 36px login padding. Mobile reduces edit padding to 20px 16px and login padding to 26px. The public agenda itself is composed of open rows.
 
 ### Event disclosure
-Native details/summary rows combine a leading date, title and metadata with an SVG plus control. Hover adds wash. Opening adds a faint green surface, rotates the plus 45 degrees and reveals description and calendar export aligned under the title. The reveal lasts 0.25s with cubic-bezier(0.16, 1, 0.3, 1); button color transitions last 0.18s. Reduced-motion overrides remove animations, transitions and smooth scrolling.
+Native details/summary rows combine a leading date, title and metadata with an SVG plus control. The next upcoming date switches its numeral and weekday to the brighter club green, with a bold weekday; it has no fill. Past rows in a month view use muted numerals and titles. Hover adds wash. Opening adds a faint green surface, rotates the plus 45 degrees and reveals the description aligned under the title. The reveal lasts 0.25s with cubic-bezier(0.16, 1, 0.3, 1); button color transitions last 0.18s. Reduced-motion overrides remove animations, transitions and smooth scrolling, including script-driven scrolling.
 
 ## Do's and Don'ts
 

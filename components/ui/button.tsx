@@ -10,15 +10,15 @@ const buttonVariants = cva(
         default:
           "border-0 bg-primary text-primary-foreground hover:bg-primary-dark",
         outline:
-          "border border-border bg-background hover:border-[#99ae94] hover:bg-muted",
+          "border border-border bg-background hover:border-input hover:bg-muted",
         ghost: "border-0 bg-transparent hover:bg-muted",
-        destructive: "border-0 bg-[#a33928] text-white hover:bg-destructive",
+        destructive: "border-0 bg-danger text-white hover:bg-destructive",
         link: "border-0 bg-transparent text-primary underline-offset-4 hover:underline print:hidden",
       },
       size: {
-        default: "min-h-[45px] gap-3 px-[19px] py-3",
-        icon: "size-10 gap-0 rounded-[5px] p-0 text-primary max-md:size-9",
-        link: "min-h-[35px] gap-2.5 rounded-none p-0 text-xs",
+        default: "min-h-11.25 gap-3 px-4.75 py-3",
+        icon: "size-11 gap-0 rounded-md p-0 text-primary",
+        link: "min-h-11 gap-2.5 rounded-none p-0 text-xs",
         month: "h-auto min-h-0 gap-3",
       },
     },

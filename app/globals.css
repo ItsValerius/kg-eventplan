@@ -21,8 +21,11 @@
   --accent: #e2f9c5;
   --accent-foreground: #124d22;
   --destructive: #9a3524;
+  --destructive-surface: #fff0eb;
+  --danger: #a33928;
+  --surface-open: #fafcf7;
   --border: #dce3d9;
-  --input: #b8c4b4;
+  --input: #7f8e7c;
   --ring: #439537;
   --radius: 0.375rem;
 }
@@ -44,6 +47,9 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-surface: var(--destructive-surface);
+  --color-danger: var(--danger);
+  --color-surface-open: var(--surface-open);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -68,7 +74,7 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 30px;
-    scrollbar-color: #92a18e #f5f7f2;
+    scrollbar-color: var(--input) var(--muted);
   }
   body {
     @apply bg-background font-sans text-[15px] leading-normal text-foreground antialiased;
@@ -81,10 +87,13 @@
   }
   button,
   a,
+  summary,
   input,
   select,
   textarea {
     -webkit-tap-highlight-color: transparent;
+    /* transition-colors animates outline-color; start focus rings in green, not ink. */
+    outline-color: var(--ring);
   }
   button {
     cursor: pointer;
@@ -98,7 +107,7 @@
   }
   input::placeholder,
   textarea::placeholder {
-    color: #63715f;
+    color: var(--muted-foreground);
     opacity: 1;
   }
   button:focus-visible,
