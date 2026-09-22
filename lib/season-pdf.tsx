@@ -4,6 +4,7 @@ import {
   Document,
   Font,
   Image as PdfImage,
+  Link,
   Page,
   StyleSheet,
   Text,
@@ -18,6 +19,9 @@ Font.register({
   src: path.join(process.cwd(), "public/fonts/barlow-condensed-bold.ttf"),
 });
 
+const SITE_URL = "https://sessionsplan.knallkoepp-golkrath.de";
+const SITE_LABEL = "sessionsplan.knallkoepp-golkrath.de";
+
 const GREEN = "#176717";
 const INK = "#17251c";
 const MUTED = "#5b685e";
@@ -30,6 +34,7 @@ const styles = StyleSheet.create({
   wordmark: { fontFamily: "Barlow Condensed Bold", fontSize: 14, color: GREEN, lineHeight: 1.3 },
   headline: { fontFamily: "Barlow Condensed Bold", fontSize: 26, color: INK, marginBottom: 4 },
   stand: { fontSize: 9, color: MUTED, marginBottom: 24 },
+  link: { color: GREEN, textDecoration: "none" },
   monthHeading: {
     fontFamily: "Helvetica-Bold",
     fontSize: 12,
@@ -104,7 +109,10 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
         <Text style={styles.headline}>
           Alle Termine der Knallköpp für die Session 2026/2027.
         </Text>
-        <Text style={styles.stand}>Stand: {generatedAt}</Text>
+        <Text style={styles.stand}>
+          Stand: {generatedAt} · Aktuelle Termine und Änderungen findest du immer unter{" "}
+          <Link style={styles.link} src={SITE_URL}>{SITE_LABEL}</Link>
+        </Text>
 
         {!events.length && (
           <View style={styles.emptyState}>
@@ -147,7 +155,10 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
         ))}
 
         <View style={styles.footer} fixed>
-          <Text>Änderungen vorbehalten. Wir halten euch hier auf dem Laufenden.</Text>
+          <Text>
+            Änderungen vorbehalten. Immer aktuell:{" "}
+            <Link style={styles.link} src={SITE_URL}>{SITE_LABEL}</Link>
+          </Text>
           <Text render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>
       </Page>
@@ -155,8 +166,12 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
   );
 }
 
+export function renderSeasonPlanPdf(events: ClubEvent[]) {
+  return renderToBuffer(<SeasonPlanDocument events={events} />);
+}
+
 export async function regenerateSeasonPlanPdf(events: ClubEvent[]): Promise<void> {
-  const buffer = await renderToBuffer(<SeasonPlanDocument events={events} />);
+  const buffer = await renderSeasonPlanPdf(events);
   await put(SESSION_PLAN_BLOB_PATHNAME, buffer, {
     access: "public",
     contentType: "application/pdf",
