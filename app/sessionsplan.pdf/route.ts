@@ -10,7 +10,10 @@ export async function GET() {
     throw error;
   }
 
-  const upstream = await fetch(blob.url);
+  // Bust Vercel Blob's CDN cache on overwrite: the etag changes with content,
+  // so appending it forces a fresh fetch instead of a stale cached copy.
+  const url = `${blob.url}?v=${encodeURIComponent(blob.etag)}`;
+  const upstream = await fetch(url, { cache: "no-store" });
   if (!upstream.ok || !upstream.body) return new Response("Not found", { status: 404 });
 
   return new Response(upstream.body, {
