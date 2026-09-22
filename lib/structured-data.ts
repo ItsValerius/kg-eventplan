@@ -19,11 +19,19 @@ function berlinOffset(date: string, time: string) {
   return offset?.replace("GMT", "") || "+01:00";
 }
 
-// schema.org events, so search engines can list the dates.
+// The host is the part of the title before the dash ("Ratheimer Karnevalsgesellschaft – Biwak").
+function organizer(title: string) {
+  if (isClubEvent(title)) return club;
+  const host = title.split(/\s[–-]\s/)[0]?.trim();
+  return host && host !== title.trim() ? { "@type": "Organization", name: host } : undefined;
+}
+
+// schema.org events, so search engines can list the dates. Google requires a venue,
+// so events without one are left out until it is entered.
 export function eventsJsonLd(events: ClubEvent[]) {
   return {
     "@context": "https://schema.org",
-    "@graph": events.map((event) => ({
+    "@graph": events.filter((event) => event.location).map((event) => ({
       "@type": "Event",
       name: event.title,
       startDate: event.time
@@ -32,11 +40,10 @@ export function eventsJsonLd(events: ClubEvent[]) {
       eventStatus: "https://schema.org/EventScheduled",
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       url: `${siteUrl}/#termin-${encodeURIComponent(event.id)}`,
+      image: `${siteUrl}/opengraph-image`,
       ...(event.description && { description: event.description }),
-      ...(event.location && {
-        location: { "@type": "Place", name: event.location, address: event.location },
-      }),
-      ...(isClubEvent(event.title) && { organizer: club }),
+      location: { "@type": "Place", name: event.location, address: event.location },
+      ...(organizer(event.title) && { organizer: organizer(event.title) }),
     })),
   };
 }
