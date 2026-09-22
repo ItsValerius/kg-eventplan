@@ -75,6 +75,8 @@
     scroll-behavior: smooth;
     scroll-padding-top: 30px;
     scrollbar-color: var(--input) var(--muted);
+    /* Reserve the scrollbar track so short and long pages share one width. */
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-background font-sans text-[15px] leading-normal text-foreground antialiased;
