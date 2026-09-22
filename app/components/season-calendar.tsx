@@ -7,10 +7,8 @@ import type { ClubEvent } from "@/lib/events";
 import { formatDate, todayInBerlin } from "@/lib/format";
 import { Icon } from "./icons";
 import { de } from "date-fns/locale";
+import { season } from "@/lib/season";
 
-const coreSessionMonths = ["2026-11", "2026-12", "2027-01", "2027-02"];
-// Aschermittwoch ends the session (Rosenmontag is 8 February 2027).
-const sessionEnd = "2027-02-10";
 
 // The day picker is only needed once a month is chosen.
 const loadCalendar = () =>
@@ -67,6 +65,16 @@ function CalendarDay({ day, modifiers, className, ...props }: DayButtonProps) {
   );
 }
 
+function openRow(row: HTMLDetailsElement | null) {
+  if (!row) return;
+  row.open = true;
+  row.scrollIntoView({
+    behavior: prefersReducedMotion() ? "auto" : "smooth",
+    block: "start",
+  });
+  row.querySelector("summary")?.focus({ preventScroll: true });
+}
+
 export default function SeasonCalendar({
   events,
   hasSessionPlanPdf,
@@ -86,6 +94,34 @@ export default function SeasonCalendar({
     else monthButtons.current.get(target)?.focus();
     focusTarget.current = null;
   }, [month]);
+  // Shared links (#termin-<id>) open their event, switching to its month if it is already past.
+  const linkedId = useRef<string | null>(null);
+  const [linkTick, setLinkTick] = useState(0);
+  useEffect(() => {
+    const read = () => {
+      const match = location.hash.match(/^#termin-(.+)$/);
+      const event = match && events.find((e) => e.id === decodeURIComponent(match[1]));
+      if (!event) return;
+      const eventMonth = event.date.slice(0, 7);
+      const past = event.date < currentDay();
+      setMonth((current) =>
+        current === eventMonth || (!current && !past) ? current : eventMonth,
+      );
+      linkedId.current = event.id;
+      setLinkTick((tick) => tick + 1);
+    };
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
+  }, [events]);
+  useEffect(() => {
+    if (!linkedId.current || !today) return;
+    // The row may only render after the month switch; keep waiting until it exists.
+    const row = document.getElementById(`termin-${linkedId.current}`);
+    if (!row) return;
+    openRow(row as HTMLDetailsElement);
+    linkedId.current = null;
+  }, [linkTick, month, today]);
   const eventDates = new Set(events.map((event) => event.date));
   const countByMonth = new Map<string, number>();
   for (const event of events) {
@@ -93,7 +129,7 @@ export default function SeasonCalendar({
     countByMonth.set(key, (countByMonth.get(key) ?? 0) + 1);
   }
   // Always offer the core session months, plus any month outside them that has events.
-  const sessionMonths = [...new Set([...coreSessionMonths, ...countByMonth.keys()])].sort();
+  const sessionMonths = [...new Set([...season.coreMonths, ...countByMonth.keys()])].sort();
   const isPast = (event: ClubEvent) => today !== null && event.date < today;
   const nextDate = today ? events.find((event) => event.date >= today)?.date : undefined;
   const filtered = events.filter((event) => !month || event.date.startsWith(month));
@@ -101,17 +137,9 @@ export default function SeasonCalendar({
   const shown = month ? filtered : filtered.filter((event) => !isPast(event));
 
   function jumpToDay(date: Date) {
-    const row = document.querySelector<HTMLDetailsElement>(
-      `details[data-date="${toDateValue(date)}"]`,
-    );
-    if (!row) return;
-    row.open = true;
-    row.scrollIntoView({
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-      block: "start",
-    });
-    row.querySelector("summary")?.focus({ preventScroll: true });
+    openRow(document.querySelector<HTMLDetailsElement>(`details[data-date="${toDateValue(date)}"]`));
   }
+
 
   function renderGroups(list: ClubEvent[]) {
     const groups = [...new Set(list.map((e) => e.date.slice(0, 7)))];
@@ -144,7 +172,7 @@ export default function SeasonCalendar({
     <section
       className="pt-6 max-md:pt-5 print:pt-5"
       id="termine"
-      aria-label="Termine der Session 2026/2027"
+      aria-label={`Termine der Session ${season.label}`}
     >
       <div className="grid grid-cols-[300px_minmax(0,1fr)] gap-12 max-lg:grid-cols-[270px_minmax(0,1fr)] max-lg:gap-8 max-md:flex max-md:flex-col max-md:gap-8 print:block">
         <aside className="md:sticky md:top-6 md:self-start print:hidden">
@@ -157,7 +185,7 @@ export default function SeasonCalendar({
               render={
                 <a
                   href="/sessionsplan.pdf"
-                  download="knallkoepp-sessionsplan-2026-2027.pdf"
+                  download={`knallkoepp-sessionsplan-${season.slug}.pdf`}
                 />
               }
             >
@@ -175,11 +203,12 @@ export default function SeasonCalendar({
               >
                 {sessionMonths.map((value) => {
                   const count = countByMonth.get(value) ?? 0;
+                  const over = today !== null && value < today.slice(0, 7);
                   const name = formatDate(`${value}-01`, { month: "long" });
                   return (
                     <button
                       className={`flex min-h-14 items-center justify-between gap-2 rounded-md px-3.5 text-left text-[13px] font-semibold capitalize transition-colors ${
-                        count
+                        count && !over
                           ? "bg-muted text-foreground hover:bg-accent hover:text-primary-dark"
                           : "border border-border text-muted-foreground hover:bg-muted"
                       }`}
@@ -197,7 +226,7 @@ export default function SeasonCalendar({
                     >
                       {name}
                       <span
-                        className={`font-display text-[1.375rem] leading-none tabular-nums ${count ? "text-primary" : ""}`}
+                        className={`font-display text-[1.375rem] leading-none tabular-nums ${count && !over ? "text-primary" : ""}`}
                         aria-hidden="true"
                       >
                         {count}
@@ -280,13 +309,13 @@ export default function SeasonCalendar({
                 </>
               ) : month ? (
                 <h2>
-                  {today && (today > sessionEnd || month < today.slice(0, 7))
+                  {today && (today > season.end || month < today.slice(0, 7))
                     ? `Im ${formatDate(`${month}-01`, { month: "long" })} gab es keine Termine.`
                     : `Für ${formatDate(`${month}-01`, { month: "long" })} stehen noch keine Termine fest.`}
                 </h2>
-              ) : today && today > sessionEnd ? (
+              ) : today && today > season.end ? (
                 <>
-                  <h2>Die Session 2026/2027 ist vorbei.</h2>
+                  <h2>Die Session {season.label} ist vorbei.</h2>
                   <p>Alle Termine findest du weiterhin über die Monate.</p>
                 </>
               ) : (
@@ -317,6 +346,13 @@ function EventRow({
       className="group/event border-b border-border open:bg-surface-open print:break-inside-avoid [&_summary]:flex [&_summary]:cursor-pointer [&_summary]:list-none [&_summary]:items-center [&_summary]:gap-6 [&_summary]:px-1 [&_summary]:py-5.5 [&_summary::-webkit-details-marker]:hidden [&_summary:hover]:bg-muted max-lg:[&_summary]:gap-4 max-md:[&_summary]:gap-3.25 max-md:[&_summary]:px-0 max-md:[&_summary]:py-5 print:[&_summary]:py-3.5"
       id={`termin-${event.id}`}
       data-date={event.date}
+      onToggle={(e) => {
+        // Keep the open event in the address bar, so copying the URL shares it.
+        const hash = `#termin-${encodeURIComponent(event.id)}`;
+        if (e.currentTarget.open) history.replaceState(null, "", hash);
+        else if (location.hash === hash)
+          history.replaceState(null, "", location.pathname + location.search);
+      }}
     >
       <summary>
         <span

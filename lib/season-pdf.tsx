@@ -13,6 +13,7 @@ import {
 } from "@react-pdf/renderer";
 import { formatDate, sortEvents, type ClubEvent } from "./events";
 import { SESSION_PLAN_BLOB_PATHNAME } from "./season-pdf-path";
+import { season } from "./season";
 
 Font.register({
   family: "Barlow Condensed Bold",
@@ -97,7 +98,7 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
     year: "numeric",
   });
   return (
-    <Document title="Sessionsplan 2026/2027 – KG Knallköpp Golkrath">
+    <Document title={`Sessionsplan ${season.label} – KG Knallköpp Golkrath`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <PdfImage style={styles.logo} src={path.join(process.cwd(), "public/images/club-logo.png")} />
@@ -107,7 +108,7 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
           </View>
         </View>
         <Text style={styles.headline}>
-          Alle Termine der Knallköpp für die Session 2026/2027.
+          Alle Termine der Knallköpp für die Session {season.label}.
         </Text>
         <Text style={styles.stand}>
           Stand: {generatedAt} · Aktuelle Termine und Änderungen findest du immer unter{" "}

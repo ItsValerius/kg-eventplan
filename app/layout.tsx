@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { season } from "@/lib/season";
+import { siteUrl } from "@/lib/structured-data";
 
 const display = localFont({
   src: "../public/fonts/barlow-condensed-bold.woff2",
   variable: "--font-barlow",
   display: "swap",
 });
-const title = "Sessionsplan 2026/2027 | Knallköpp Golkrath";
+const title = `Sessionsplan ${season.label} | Knallköpp Golkrath`;
 const description =
-  "Alle Termine der KG Knallköpp Golkrath für die Karnevalssession 2026/2027.";
+  `Alle Termine der KG Knallköpp Golkrath für die Karnevalssession ${season.label}.`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://sessionsplan.knallkoepp-golkrath.de"),
+  metadataBase: new URL(siteUrl),
   title,
   description,
   alternates: { canonical: "/" },

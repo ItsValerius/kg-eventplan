@@ -1,5 +1,7 @@
 import { z } from "zod";
-export { formatDate } from "./format";
+import { formatDate } from "./format";
+import { season } from "./season";
+export { formatDate };
 
 const dateSchema = z
   .string({ error: "Bitte gib ein gültiges Datum ein." })
@@ -11,8 +13,8 @@ const dateSchema = z
     "Bitte gib ein gültiges Datum ein.",
   )
   .refine(
-    (date) => date >= "2026-09-01" && date <= "2027-08-31",
-    "Das Datum muss in der Session liegen (September 2026 bis August 2027).",
+    (date) => date >= season.firstDay && date <= season.lastDay,
+    `Das Datum muss in der Session liegen (${formatDate(season.firstDay, { month: "long", year: "numeric" })} bis ${formatDate(season.lastDay, { month: "long", year: "numeric" })}).`,
   );
 
 const timeSchema = z.preprocess(

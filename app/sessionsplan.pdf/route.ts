@@ -1,5 +1,6 @@
 import { BlobNotFoundError, head } from "@vercel/blob";
 import { SESSION_PLAN_BLOB_PATHNAME } from "@/lib/season-pdf-path";
+import { season } from "@/lib/season";
 
 export async function GET() {
   let blob;
@@ -19,7 +20,7 @@ export async function GET() {
   return new Response(upstream.body, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": 'attachment; filename="knallkoepp-sessionsplan-2026-2027.pdf"',
+      "Content-Disposition": `attachment; filename="knallkoepp-sessionsplan-${season.slug}.pdf"`,
       "Cache-Control": "public, max-age=60",
     },
   });

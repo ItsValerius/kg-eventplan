@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, date, index, pgTable, text, time } from "drizzle-orm/pg-core";
+import { season } from "../lib/season";
 
 export const events = pgTable("events", {
   id: text().primaryKey(),
@@ -12,7 +13,7 @@ export const events = pgTable("events", {
 }, (table) => [
   index("events_chronological").on(table.date, table.time, table.id),
   check("events_title_length", sql`char_length(btrim(${table.title})) BETWEEN 1 AND 120`),
-  check("events_season_date", sql`${table.date} BETWEEN DATE '2026-09-01' AND DATE '2027-08-31'`),
+  check("events_season_date", sql`${table.date} BETWEEN DATE ${sql.raw(`'${season.firstDay}'`)} AND DATE ${sql.raw(`'${season.lastDay}'`)}`),
   check("events_minute_time", sql`EXTRACT(SECOND FROM ${table.time}) = 0`),
   check("events_location_length", sql`char_length(btrim(${table.location})) BETWEEN 1 AND 180`),
   check("events_description_length", sql`char_length(${table.description}) <= 2000`),

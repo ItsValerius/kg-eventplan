@@ -21,7 +21,10 @@ import {
   logoutAction,
   saveEventAction,
 } from "./actions";
+import { season } from "@/lib/season";
 type Draft = Omit<ClubEvent, "id"> & { id?: string };
+type Field = "title" | "date" | "time" | "location" | "description";
+const fieldOrder: Field[] = ["title", "date", "time", "location", "description"];
 // Prefill the venue the club itself uses most, so new club events need no retyping.
 function usualVenue(events: ClubEvent[]) {
   const counts = new Map<string, number>();
@@ -59,6 +62,7 @@ export default function AdminPanel({
   const [busy, setBusy] = useState(false);
   const [transitioning, startTransition] = useTransition();
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({});
   const [password, setPassword] = useState("");
   const titleRef = useRef<HTMLInputElement>(null);
   const editButtons = useRef(new Map<string, HTMLButtonElement>());
@@ -101,22 +105,53 @@ export default function AdminPanel({
       setBusy(false);
     }
   }
-  function openForm(event?: ClubEvent) {
-    setDraft(event ? { ...event } : blank(events));
+  function openForm(event?: ClubEvent, copy = false) {
+    if (event && copy) {
+      // A copy keeps title, time, venue and description; the date is what changes.
+      setDraft({ ...event, id: undefined, date: "", published: false });
+    } else setDraft(event ? { ...event } : blank(events));
     setDeleting(null);
+    setFieldErrors({});
     setError("");
     setNotice("");
     requestAnimationFrame(() => {
       document
         .getElementById("event-form")
         ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
-      titleRef.current?.focus({ preventScroll: true });
+      const target = copy ? document.getElementById("field-date") : titleRef.current;
+      target?.focus({ preventScroll: true });
     });
+  }
+  function update(field: Field | "published", value: string | boolean | null) {
+    if (!draft) return;
+    setDraft({ ...draft, [field]: value });
+    if (field !== "published" && fieldErrors[field])
+      setFieldErrors({ ...fieldErrors, [field]: undefined });
+  }
+  function fieldProps(field: Field) {
+    return {
+      id: `field-${field}`,
+      "aria-invalid": fieldErrors[field] ? true : undefined,
+      "aria-describedby": fieldErrors[field] ? `field-${field}-error` : undefined,
+    };
+  }
+  function fieldError(field: Field) {
+    return (
+      fieldErrors[field] && (
+        <span
+          id={`field-${field}-error`}
+          className="mt-1.5 block text-xs font-normal text-destructive"
+        >
+          {fieldErrors[field]}
+        </span>
+      )
+    );
   }
   // Return focus to the row the form or confirmation belonged to.
   function closeForm() {
     const id = draft?.id;
     setDraft(null);
+    setFieldErrors({});
     if (id) requestAnimationFrame(() => editButtons.current.get(id)?.focus());
   }
   function askDelete(id: string) {
@@ -132,10 +167,20 @@ export default function AdminPanel({
     if (!draft) return;
     const validated = eventSchema.safeParse(draft);
     if (!validated.success) {
-      setError(validationMessage(validated.error));
+      // Show each problem under its field and move focus to the first one.
+      const errors: Partial<Record<Field, string>> = {};
+      for (const issue of validated.error.issues) {
+        const field = issue.path[0] as Field;
+        if (fieldOrder.includes(field)) errors[field] ??= issue.message;
+      }
+      setFieldErrors(errors);
+      setError(Object.keys(errors).length ? "" : validationMessage(validated.error));
       setNotice("");
+      const first = fieldOrder.find((field) => errors[field]);
+      if (first) document.getElementById(`field-${first}`)?.focus();
       return;
     }
+    setFieldErrors({});
     setBusy(true);
     setError("");
     setNotice("");
@@ -211,12 +256,13 @@ export default function AdminPanel({
         </div>
         <form
           className="rounded-xl border border-border bg-muted p-9 [&>svg]:mb-5 [&>svg]:text-primary [&_h2]:text-4xl [&>p]:mt-4 [&>p]:mb-6.25 [&>p]:text-[13px] [&>p]:leading-[1.8] [&>label]:mb-2 [&>label]:block [&>label]:text-xs [&>label]:font-semibold *:data-[slot=button]:mt-4 *:data-[slot=button]:w-full *:data-[slot=button]:justify-between max-md:p-6.5"
+          noValidate
           onSubmit={login}
         >
           <Icon name="lock" size={28} />
           <h2>Willkommen im Team.</h2>
           <p>
-            Melde dich an, um die Termine der Session 2026/2027 zu verwalten.
+            Melde dich an, um die Termine der Session {season.label} zu verwalten.
           </p>
           {!configured ? (
             <div className="my-5 flex items-center gap-2.5 rounded-md px-4.5 py-3.5 text-[13px] leading-[1.6] max-md:text-xs bg-destructive-surface text-destructive">
@@ -228,6 +274,8 @@ export default function AdminPanel({
               <label htmlFor="password">Admin-Passwort</label>
               <Input
                 id="password"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "login-error" : undefined}
                 type="password"
                 autoComplete="current-password"
                 required
@@ -248,6 +296,7 @@ export default function AdminPanel({
           )}
           {error && (
             <p
+              id="login-error"
               className="my-5 flex items-center gap-2.5 rounded-md px-4.5 py-3.5 text-[13px] leading-[1.6] max-md:text-xs bg-destructive-surface text-destructive"
               role="alert"
             >
@@ -276,6 +325,7 @@ export default function AdminPanel({
     <form
       className={`scroll-mt-6 rounded-xl border border-border bg-muted p-7.5 max-md:px-4 max-md:py-5 ${draft.id ? "col-span-full mt-2" : "my-7.5"}`}
       id="event-form"
+      noValidate
       onSubmit={save}
       onKeyDown={(e) => {
         if (e.key === "Escape" && !busy) closeForm();
@@ -299,57 +349,67 @@ export default function AdminPanel({
           Titel
           <Input
             ref={titleRef}
+            {...fieldProps("title")}
             required
             maxLength={120}
             value={draft.title}
-            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+            onChange={(e) => update("title", e.target.value)}
             placeholder="z. B. KG Knallköpp – Biwak"
           />
+          {fieldError("title")}
         </label>
         <label>
           Datum
           <Input
+            {...fieldProps("date")}
             type="date"
             required
-            min="2026-09-01"
-            max="2027-08-31"
+            min={season.firstDay}
+            max={season.lastDay}
             value={draft.date}
-            onChange={(e) => setDraft({ ...draft, date: e.target.value })}
+            onChange={(e) => update("date", e.target.value)}
           />
+          {fieldError("date")}
         </label>
         <label>
           Uhrzeit{" "}
           <span className="font-normal text-muted-foreground">(optional)</span>
           <Input
+            {...fieldProps("time")}
             type="time"
             value={draft.time ?? ""}
-            onChange={(e) => setDraft({ ...draft, time: e.target.value || null })}
+            onChange={(e) => update("time", e.target.value || null)}
           />
+          {fieldError("time")}
         </label>
         <label className="col-span-full">
           Veranstaltungsort{" "}
           <span className="font-normal text-muted-foreground">(optional)</span>
           <Input
+            {...fieldProps("location")}
             maxLength={180}
             value={draft.location ?? ""}
-            onChange={(e) => setDraft({ ...draft, location: e.target.value || null })}
+            onChange={(e) => update("location", e.target.value || null)}
           />
+          {fieldError("location")}
         </label>
         <label className="col-span-full">
           Beschreibung{" "}
           <span className="font-normal text-muted-foreground">(optional)</span>
           <Textarea
+            {...fieldProps("description")}
             rows={4}
             maxLength={2000}
             value={draft.description}
-            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+            onChange={(e) => update("description", e.target.value)}
             placeholder="Was erwartet die Jecken?"
           />
+          {fieldError("description")}
         </label>
         <label className="col-span-full flex! items-start gap-2.5 [&_small]:mt-0.75 [&_small]:block [&_small]:text-xs [&_small]:font-normal [&_small]:text-muted-foreground">
           <Checkbox
             checked={draft.published}
-            onCheckedChange={(checked) => setDraft({ ...draft, published: checked })}
+            onCheckedChange={(checked) => update("published", checked)}
           />
           <span>
             Termin veröffentlichen
@@ -381,7 +441,7 @@ export default function AdminPanel({
       <div className="flex items-center justify-between gap-5 max-md:items-start [&_h1]:text-[58px] max-md:[&_h1]:text-[42px] [&_p]:mt-4 [&_p]:text-[13px] max-md:[&_p]:mt-3 max-md:[&_p]:text-xs">
         <div>
           <h1>Die Session gestalten.</h1>
-          <p>Termine verwalten · Session 2026/2027</p>
+          <p>Termine verwalten · Session {season.label}</p>
         </div>
         <Button
           className="max-md:min-h-11 max-md:px-3.5"
@@ -431,7 +491,7 @@ export default function AdminPanel({
       {draft && !draft.id && form}
       <section aria-label="Termine verwalten">
         <div
-          className="grid grid-cols-[1fr_190px_110px] gap-5 pt-6.5 pb-1 text-[11px] font-semibold tracking-[.08em] text-muted-foreground uppercase max-lg:grid-cols-[1fr_135px_100px] max-lg:gap-3 max-md:hidden [&>span:last-child]:text-right"
+          className="grid grid-cols-[1fr_190px_160px] gap-5 pt-6.5 pb-1 text-[11px] font-semibold tracking-[.08em] text-muted-foreground uppercase max-lg:grid-cols-[1fr_120px_152px] max-lg:gap-3 max-md:hidden [&>span:last-child]:text-right"
           aria-hidden="true"
         >
           <span>Termin</span>
@@ -451,10 +511,10 @@ export default function AdminPanel({
               .filter((event) => event.date.startsWith(month))
               .map((event) => (
                 <article
-                  className="grid grid-cols-[1fr_190px_110px] items-center gap-5 border-b border-border py-5 max-lg:grid-cols-[1fr_135px_100px] max-lg:gap-3 max-md:grid-cols-[1fr_auto]"
+                  className="grid grid-cols-[1fr_190px_160px] items-center gap-5 border-b border-border py-5 max-lg:grid-cols-[1fr_120px_152px] max-lg:gap-3 max-md:grid-cols-[1fr_auto] max-md:gap-y-3"
                   key={event.id}
                 >
-                  <div className="flex min-w-0 items-center gap-5.5 max-md:gap-3 [&_h3]:text-base [&_h3]:leading-[1.35] max-md:[&_h3]:text-[15px] [&_p]:mt-1.5 [&_p]:text-xs">
+                  <div className="flex min-w-0 items-center gap-5.5 max-md:col-span-full max-md:gap-3 [&_h3]:text-base [&_h3]:leading-[1.35] max-md:[&_h3]:text-[15px] [&_p]:mt-1.5 [&_p]:text-xs">
                     <span className="flex min-w-10.5 flex-col items-center [&_strong]:font-display [&_strong]:text-[35px] [&_strong]:leading-none [&_strong]:text-primary [&_strong]:tabular-nums [&>span]:text-[11px] [&>span]:text-muted-foreground">
                       <strong>{event.date.slice(8)}</strong>
                       <span>{formatDate(event.date, { month: "short" })}</span>
@@ -475,7 +535,7 @@ export default function AdminPanel({
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-start gap-1.75 max-md:col-start-1 max-md:flex-row max-md:items-center max-md:pl-13.5">
+                  <div className="flex flex-col items-start gap-1.75 max-md:flex-row max-md:items-center max-md:pl-13.5">
                     <Badge
                       className={
                         event.published
@@ -486,7 +546,7 @@ export default function AdminPanel({
                       {event.published ? "Veröffentlicht" : "Entwurf"}
                     </Badge>
                   </div>
-                  <div className="flex justify-end gap-2 max-md:col-start-2 max-md:row-span-2 max-md:row-start-1 max-md:flex-col">
+                  <div className="flex justify-end gap-2">
                     <Button
                       ref={(node) => {
                         if (node) editButtons.current.set(event.id, node);
@@ -500,6 +560,15 @@ export default function AdminPanel({
                       onClick={() => openForm(event)}
                     >
                       <Icon name="edit" size={18} />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      disabled={busy}
+                      aria-label={`${event.title} duplizieren`}
+                      onClick={() => openForm(event, true)}
+                    >
+                      <Icon name="copy" size={18} />
                     </Button>
                     <Button
                       variant="outline"

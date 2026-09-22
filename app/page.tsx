@@ -3,6 +3,8 @@ import { Footer } from "./components/shell";
 import SeasonCalendar from "./components/season-calendar";
 import { hasSessionPlanPdf, readPublicEvents } from "@/lib/public-events";
 import { Suspense } from "react";
+import { season } from "@/lib/season";
+import { eventsJsonLd } from "@/lib/structured-data";
 
 function CalendarFallback() {
   return (
@@ -29,6 +31,12 @@ export default async function Home() {
   ]);
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(eventsJsonLd(events)).replace(/</g, "\\u003c"),
+        }}
+      />
       <main
         id="main-content"
         tabIndex={-1}
@@ -39,7 +47,7 @@ export default async function Home() {
             <h1>
               Alle Termine der Knallköpp
               <span className="block text-primary">
-                für die Session 2026/2027.
+                für die Session {season.label}.
               </span>
             </h1>
           </div>

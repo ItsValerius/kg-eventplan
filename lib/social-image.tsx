@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { season } from "./season";
 
-export const alt = "Sessionsplan 2026/2027 – KG Knallköpp Golkrath";
+export const alt = `Sessionsplan ${season.label} – KG Knallköpp Golkrath`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -44,7 +45,7 @@ export async function renderSocialImage() {
             lineHeight: 1.05,
           }}
         >
-          Sessionsplan 2026/2027
+          Sessionsplan {season.label}
         </div>
         <div
           style={{
