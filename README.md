@@ -40,11 +40,11 @@ No Redis or polling is needed for this low-write calendar. Test cache behavior w
 
 ## Sessionsplan PDF
 
-Visitors can download the full published event list as a branded PDF. It is not generated per request: every successful admin save or delete regenerates `public/sessionsplan.pdf` from the currently published events and writes it atomically, then it is served as a plain static file at `/sessionsplan.pdf`. The download link on the public overview only appears once that file exists, so it is hidden until an administrator has saved at least one event. PDF regeneration is best-effort — a failure is logged but never blocks the admin's save or delete. This requires the running process to have write access to `public/` at runtime, a new requirement this feature introduces (previously `public/` held only build-time static assets). As with the cache above, a multi-replica deployment would need shared storage or per-replica regeneration, since the file lives on one instance's local filesystem.
+Visitors can download the full published event list as a branded PDF. It is not generated per request: every successful admin save or delete regenerates it from the currently published events and uploads it to Vercel Blob (`@vercel/blob`, requires `BLOB_READ_WRITE_TOKEN`) at a fixed pathname, overwriting the previous version. `GET /sessionsplan.pdf` is a small Route Handler that looks up the current blob and streams it back with `Content-Disposition: attachment`, so the public download URL and filename stay stable regardless of where Blob actually hosts the file. The download link on the public overview only appears once a PDF exists, so it is hidden until an administrator has saved at least one event. PDF regeneration is best-effort — a failure is logged but never blocks the admin's save or delete. Serverless deployments (Vercel and similar) have a read-only filesystem at runtime, which is why this uses Blob storage rather than writing into `public/`.
 
 ## Production
 
-Set `DATABASE_URL` to your persistent PostgreSQL database, configure a strong `ADMIN_PASSWORD` and random `ADMIN_SESSION_SECRET`, then run:
+Set `DATABASE_URL` to your persistent PostgreSQL database, configure a strong `ADMIN_PASSWORD` and random `ADMIN_SESSION_SECRET`, and connect a Vercel Blob store (provides `BLOB_READ_WRITE_TOKEN`) for the season plan PDF, then run:
 
 ```sh
 pnpm db:migrate

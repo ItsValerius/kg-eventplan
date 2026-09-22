@@ -1,6 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { put } from "@vercel/blob";
 import {
   Document,
   Font,
@@ -12,7 +11,7 @@ import {
   renderToBuffer,
 } from "@react-pdf/renderer";
 import { formatDate, sortEvents, type ClubEvent } from "./events";
-import { SESSION_PLAN_PDF_PATH } from "./season-pdf-path";
+import { SESSION_PLAN_BLOB_PATHNAME } from "./season-pdf-path";
 
 Font.register({
   family: "Barlow Condensed Bold",
@@ -156,17 +155,13 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
   );
 }
 
-export async function regenerateSeasonPlanPdf(
-  events: ClubEvent[],
-  targetPath: string = SESSION_PLAN_PDF_PATH,
-): Promise<void> {
+export async function regenerateSeasonPlanPdf(events: ClubEvent[]): Promise<void> {
   const buffer = await renderToBuffer(<SeasonPlanDocument events={events} />);
-  const tempPath = `${targetPath}.${randomUUID()}.tmp`;
-  try {
-    await writeFile(tempPath, buffer);
-    await rename(tempPath, targetPath);
-  } catch (error) {
-    await unlink(tempPath).catch(() => {});
-    throw error;
-  }
+  await put(SESSION_PLAN_BLOB_PATHNAME, buffer, {
+    access: "public",
+    contentType: "application/pdf",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    cacheControlMaxAge: 300,
+  });
 }

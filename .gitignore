@@ -44,9 +44,6 @@ next-env.d.ts
 /data/
 !.env.example
 
-# Generated season plan PDF
-/public/sessionsplan.pdf
-
 .agents/
 .codex/
 .impeccable/

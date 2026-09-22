@@ -7,10 +7,28 @@ const display = localFont({
   variable: "--font-barlow",
   display: "swap",
 });
+const title = "Sessionsplan 2026/2027 | Knallköpp Golkrath";
+const description =
+  "Die Karnevalssession der KG Knallköpp Golkrath: Veranstaltungen, Termine und gemeinsame Vorfreude auf 2026/2027.";
+
 export const metadata: Metadata = {
-  title: "Sessionsplan 2026/2027 | Knallköpp Golkrath",
-  description:
-    "Die Karnevalssession der KG Knallköpp Golkrath: Veranstaltungen, Termine und gemeinsame Vorfreude auf 2026/2027.",
+  metadataBase: new URL("https://sessionsplan.knallkoepp-golkrath.de"),
+  title,
+  description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title,
+    description,
+    url: "/",
+    siteName: "Knallköpp Golkrath",
+    locale: "de_DE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
 };
 export default function RootLayout({
   children,

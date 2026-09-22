@@ -7,15 +7,23 @@ const globalDatabase = globalThis as typeof globalThis & {
   eventDatabase?: ReturnType<typeof drizzle<typeof schema>>;
 };
 
-function connectionString() {
+function poolConfig() {
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required.");
-  return process.env.DATABASE_URL;
+  const url = new URL(process.env.DATABASE_URL);
+  const sslmode = url.searchParams.get("sslmode");
+  url.searchParams.delete("sslmode");
+  return {
+    connectionString: url.toString(),
+    // pg-connection-string warns that sslmode=require/prefer/verify-ca will stop
+    // aliasing to verify-full; request full certificate validation explicitly instead.
+    ssl: sslmode && sslmode !== "disable" ? { rejectUnauthorized: true } : undefined,
+  };
 }
 
 export function database() {
   if (globalDatabase.eventDatabase) return globalDatabase.eventDatabase;
   const pool = (globalDatabase.eventPool ??= new Pool({
-    connectionString: connectionString(),
+    ...poolConfig(),
     max: 5,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,

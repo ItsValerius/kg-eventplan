@@ -1,9 +1,10 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
-import { regenerateSeasonPlanPdf } from "../lib/season-pdf";
+import { describe, expect, it, vi } from "vitest";
 import type { ClubEvent } from "../lib/events";
+
+const put = vi.fn().mockResolvedValue({ url: "https://example.public.blob.vercel-storage.com/sessionsplan.pdf" });
+vi.mock("@vercel/blob", () => ({ put: (...args: unknown[]) => put(...args) }));
+
+const { regenerateSeasonPlanPdf } = await import("../lib/season-pdf");
 
 const sampleEvent: ClubEvent = {
   id: "test-1",
@@ -15,39 +16,29 @@ const sampleEvent: ClubEvent = {
   published: true,
 };
 
-let dir: string | undefined;
-
-afterEach(async () => {
-  if (dir) await rm(dir, { recursive: true, force: true });
-  dir = undefined;
-});
-
-async function targetPath() {
-  dir = await mkdtemp(path.join(tmpdir(), "season-pdf-test-"));
-  return path.join(dir, "sessionsplan.pdf");
+function uploadedBuffer() {
+  const [, body] = put.mock.calls.at(-1) as [string, Buffer];
+  return body;
 }
 
 describe("regenerateSeasonPlanPdf", () => {
-  it("schreibt eine gültige PDF-Datei", async () => {
-    const target = await targetPath();
-    await regenerateSeasonPlanPdf([sampleEvent], target);
-    const buffer = await readFile(target);
+  it("lädt eine gültige PDF-Datei hoch", async () => {
+    await regenerateSeasonPlanPdf([sampleEvent]);
+    const buffer = uploadedBuffer();
     expect(buffer.subarray(0, 4).toString("latin1")).toBe("%PDF");
     expect(buffer.length).toBeGreaterThan(0);
   });
 
   it("erzeugt eine Leerzustand-PDF ohne Termine", async () => {
-    const target = await targetPath();
-    await regenerateSeasonPlanPdf([], target);
-    const buffer = await readFile(target);
+    await regenerateSeasonPlanPdf([]);
+    const buffer = uploadedBuffer();
     expect(buffer.subarray(0, 4).toString("latin1")).toBe("%PDF");
   });
 
   it("verarbeitet eine Beschreibung nahe der Zeichenobergrenze", async () => {
-    const target = await targetPath();
     const longEvent: ClubEvent = { ...sampleEvent, description: "x".repeat(1999) };
-    await regenerateSeasonPlanPdf([longEvent], target);
-    const buffer = await readFile(target);
+    await regenerateSeasonPlanPdf([longEvent]);
+    const buffer = uploadedBuffer();
     expect(buffer.subarray(0, 4).toString("latin1")).toBe("%PDF");
   });
 });

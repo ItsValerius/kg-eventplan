@@ -1,8 +1,8 @@
 import "server-only";
-import { existsSync } from "node:fs";
+import { BlobNotFoundError, head } from "@vercel/blob";
 import { cacheLife, cacheTag } from "next/cache";
 import { readPublishedEvents } from "./store";
-import { SESSION_PLAN_PDF_PATH } from "./season-pdf-path";
+import { SESSION_PLAN_BLOB_PATHNAME } from "./season-pdf-path";
 
 export const EVENTS_CACHE_TAG = "season-events";
 
@@ -17,5 +17,11 @@ export async function hasSessionPlanPdf() {
   "use cache";
   cacheTag(EVENTS_CACHE_TAG);
   cacheLife({ stale: 30, revalidate: 300, expire: 3600 });
-  return existsSync(SESSION_PLAN_PDF_PATH);
+  try {
+    await head(SESSION_PLAN_BLOB_PATHNAME);
+    return true;
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) return false;
+    throw error;
+  }
 }
