@@ -11,6 +11,7 @@
     "db:up": "docker compose up -d --wait db",
     "db:down": "docker compose down",
     "db:migrate": "tsx scripts/db.ts migrate",
+    "db:deploy": "tsx scripts/db.ts deploy",
     "db:seed": "tsx scripts/db.ts seed",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
