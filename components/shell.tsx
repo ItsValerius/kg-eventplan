@@ -64,10 +64,8 @@ export function Footer() {
       </div>
       <p>Jolkere Knall Mött!</p>
       <div className="flex gap-5 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a:hover]:underline max-md:gap-3.75">
-        <a href="https://www.knallkoepp-golkrath.de/impressum/">Impressum</a>
-        <a href="https://www.knallkoepp-golkrath.de/datenschutzerklärung/">
-          Datenschutz
-        </a>
+        <Link href="/impressum">Impressum</Link>
+        <Link href="/datenschutz">Datenschutz</Link>
       </div>
     </footer>
   );

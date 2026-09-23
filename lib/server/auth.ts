@@ -2,8 +2,10 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { lt } from "drizzle-orm";
 import { headers } from "next/headers";
 import { database } from "@/db/client";
+import { rateLimits, sessions } from "@/db/schema";
 import { siteUrl } from "@/lib/seo/structured-data";
 
 // Admin accounts only: there is no public sign-up, accounts come from `pnpm admin:create`.
@@ -41,6 +43,19 @@ export const auth = betterAuth({
     storage: "database",
     customRules: {
       "/sign-in/email": { window: 15 * 60, max: 10 },
+    },
+  },
+  // Data minimisation (see /datenschutz): every sign-in removes expired sessions and
+  // rate-limit counters (they hold IP addresses) that are older than a day.
+  databaseHooks: {
+    session: {
+      create: {
+        after: async () => {
+          const db = database();
+          await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
+          await db.delete(rateLimits).where(lt(rateLimits.lastRequest, Date.now() - 24 * 60 * 60 * 1000));
+        },
+      },
     },
   },
   plugins: [nextCookies()],
