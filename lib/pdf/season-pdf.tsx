@@ -1,5 +1,4 @@
 import path from "node:path";
-import { put } from "@vercel/blob";
 import {
   Document,
   Font,
@@ -13,7 +12,7 @@ import {
 } from "@react-pdf/renderer";
 import { sortEvents, type ClubEvent } from "../events";
 import { eventName, formatDate, groupByMonth, todayInBerlin } from "../format";
-import { SESSION_PLAN_BLOB_PATHNAME } from "./path";
+import { savePdf } from "./storage";
 import { season } from "../season";
 import { siteUrl } from "../seo/structured-data";
 
@@ -156,12 +155,5 @@ export function renderSeasonPlanPdf(events: ClubEvent[]) {
 }
 
 export async function regenerateSeasonPlanPdf(events: ClubEvent[]): Promise<void> {
-  const buffer = await renderSeasonPlanPdf(events);
-  await put(SESSION_PLAN_BLOB_PATHNAME, buffer, {
-    access: "public",
-    contentType: "application/pdf",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    cacheControlMaxAge: 300,
-  });
+  await savePdf(await renderSeasonPlanPdf(events));
 }

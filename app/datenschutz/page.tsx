@@ -90,6 +90,10 @@ export default function DatenschutzPage() {
       <ul>
         <li>Name und E-Mail-Adresse des Zugangs sowie das Passwort als verschlüsselten Hashwert</li>
         <li>
+          für Einladungen und „Passwort vergessen“ einen einmal verwendbaren Link, der 24 Stunden
+          gültig ist
+        </li>
+        <li>
           je Anmeldung eine Sitzung mit Ablaufzeit, IP-Adresse und Browserkennung (User-Agent)
         </li>
         <li>
@@ -104,9 +108,19 @@ export default function DatenschutzPage() {
       </p>
       <p>
         Beim Abmelden wird die Sitzung gelöscht; spätestens nach acht Stunden ist sie ungültig.
-        Abgelaufene Sitzungen und Zähler, die älter als einen Tag sind, werden bei der nächsten
-        Anmeldung automatisch gelöscht. Der Zugang selbst wird gelöscht, sobald die Person keine
+        Ein Link wird mit seiner Verwendung gelöscht. Abgelaufene Sitzungen und Links sowie
+        Zähler, die älter als einen Tag sind, werden bei der nächsten Anmeldung automatisch
+        gelöscht. Der Zugang selbst wird gelöscht, sobald die Person keine
         Termine mehr pflegt.
+      </p>
+
+      <h2>E-Mail-Versand</h2>
+      <p>
+        Einladungen und Links zum Festlegen eines Passworts versenden wir über das E-Mail-Postfach
+        des Vereins bei der IONOS SE, Elgendorfer Straße 57, 56410 Montabaur. Dabei werden Name
+        und E-Mail-Adresse der eingeladenen Person sowie der Inhalt der E-Mail verarbeitet. IONOS
+        ist als Auftragsverarbeiter tätig (Art. 28 DSGVO); die Server stehen in Deutschland bzw.
+        der EU. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO.
       </p>
 
       <h2>Datenbank</h2>

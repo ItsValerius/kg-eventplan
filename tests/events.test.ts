@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   eventIdSchema,
   eventSchema,
-  loginSchema,
   validationMessage,
 } from "../lib/events";
+import { loginSchema } from "../lib/account";
 import { eventName, groupByMonth, isClubEvent } from "../lib/format";
 
 const validEvent = {

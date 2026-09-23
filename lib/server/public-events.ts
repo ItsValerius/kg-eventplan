@@ -1,8 +1,7 @@
 import "server-only";
-import { BlobNotFoundError, head } from "@vercel/blob";
 import { cacheLife, cacheTag } from "next/cache";
 import { readPublishedEvents } from "./store";
-import { SESSION_PLAN_BLOB_PATHNAME } from "../pdf/path";
+import { findPdf } from "../pdf/storage";
 import { todayInBerlin } from "../format";
 
 export const EVENTS_CACHE_TAG = "season-events";
@@ -14,20 +13,18 @@ export async function readPublicEvents() {
   return readPublishedEvents();
 }
 
-// The uploaded PDF's URL and etag, or null when there is none. Cached with the events,
-// which the admin actions refresh after every upload, so the page and the download
-// route share one Blob lookup instead of one per request.
-export async function sessionPlanBlob() {
+// The stored PDF (see lib/pdf/storage.ts), or null when there is none. Cached with the
+// events, which the admin actions refresh after every upload, so the page and the download
+// route share one lookup instead of one per request.
+export async function sessionPlanPdf() {
   "use cache";
   cacheTag(EVENTS_CACHE_TAG);
   cacheLife("events");
   try {
-    const { url, etag } = await head(SESSION_PLAN_BLOB_PATHNAME);
-    return { url, etag };
+    return await findPdf();
   } catch (error) {
-    // The PDF is optional; any Blob failure just hides it.
-    if (!(error instanceof BlobNotFoundError))
-      console.error("Sessionsplan-PDF konnte nicht geprüft werden:", error);
+    // The PDF is optional; any storage failure just hides it.
+    console.error("Sessionsplan-PDF konnte nicht geprüft werden:", error);
     return null;
   }
 }

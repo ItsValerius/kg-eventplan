@@ -25,6 +25,8 @@ pnpm admin:create you@example.com "Your Name"
 
 The command prints a generated password once. Running it again for the same address sets a new password and ends that admin's sessions; `pnpm admin:remove you@example.com` deletes the account. There is no public sign-up.
 
+After that, admins manage access themselves under **Zugänge** on `/admin`: an invitation creates the account and emails a link (valid 24 hours) with which the person sets their own password; the login page offers **Passwort vergessen?** with the same kind of link. Email goes out through the club's IONOS mailbox (`SMTP_USER`, `SMTP_PASSWORD`). To try it locally, run Mailpit (`docker run --rm -p 1025:1025 -p 8025:8025 axllent/mailpit --smtp-auth-accept-any --smtp-auth-allow-insecure`) and set `SMTP_HOST=localhost`, `SMTP_PORT=1025`; the emails appear at http://localhost:8025. `pnpm admin:create` stays available for when no admin can sign in.
+
 ## Database and existing dates
 
 PostgreSQL is the source of truth. Drizzle ORM defines the typed schema in `db/schema.ts` and handles all application, seed and integration-test queries through the `node-postgres` driver. Dates and local German event times are stored as SQL `date` and `time without time zone`, preserving their displayed values. Each edit modifies one row, so simultaneous saves of different events cannot overwrite one another. Concurrent edits to the same event use last-write-wins.
@@ -48,11 +50,11 @@ No Redis or polling is needed for this low-write calendar. Test cache behavior w
 
 ## Sessionsplan PDF
 
-Visitors can download the full published event list as a branded PDF. It is not generated per request: every successful admin save or delete regenerates it from the currently published events and uploads it to Vercel Blob (`@vercel/blob`, requires `BLOB_READ_WRITE_TOKEN`) at a fixed pathname, overwriting the previous version. `GET /sessionsplan.pdf` is a small Route Handler that looks up the current blob and streams it back with `Content-Disposition: attachment`, so the public download URL and filename stay stable regardless of where Blob actually hosts the file. The download link on the public overview only appears once a PDF exists, so it is hidden until an administrator has saved at least one event. PDF regeneration is best-effort — a failure is logged but never blocks the admin's save or delete. Serverless deployments (Vercel and similar) have a read-only filesystem at runtime, which is why this uses Blob storage rather than writing into `public/`.
+Visitors can download the full published event list as a branded PDF. It is not generated per request: every successful admin save or delete regenerates it from the currently published events and uploads it to Vercel Blob (`@vercel/blob`, requires `BLOB_READ_WRITE_TOKEN`) at a fixed pathname, overwriting the previous version. `GET /sessionsplan.pdf` is a small Route Handler that looks up the current blob and streams it back with `Content-Disposition: attachment`, so the public download URL and filename stay stable regardless of where Blob actually hosts the file. The download link on the public overview only appears once a PDF exists, so it is hidden until an administrator has saved at least one event. PDF regeneration is best-effort — a failure is logged but never blocks the admin's save or delete. Serverless deployments (Vercel and similar) have a read-only filesystem at runtime, which is why this uses Blob storage rather than writing into `public/`. Outside Vercel (local `next dev` or `next start`) the PDF is written to `data/sessionsplan.pdf` instead, so local development needs no Blob token and never overwrites the production PDF; `lib/pdf/storage.ts` picks the backend from the `VERCEL` environment variable.
 
 ## Production
 
-Set `DATABASE_URL` to your persistent PostgreSQL database, set a random `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), and connect a Vercel Blob store (provides `BLOB_READ_WRITE_TOKEN`) for the season plan PDF, then run:
+Set `DATABASE_URL` to your persistent PostgreSQL database, set a random `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), and connect a Vercel Blob store (provides `BLOB_READ_WRITE_TOKEN`) for the season plan PDF, set `SMTP_USER` and `SMTP_PASSWORD` for the club's IONOS mailbox, then run:
 
 ```sh
 pnpm db:migrate

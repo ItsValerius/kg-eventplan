@@ -53,10 +53,6 @@ export const eventIdSchema = z.object({
   id: z.string({ error: "Der Termin fehlt." }).trim().min(1, "Der Termin fehlt."),
 });
 export const storedEventSchema = eventSchema.extend(eventIdSchema.shape);
-export const loginSchema = z.object({
-  email: z.email({ error: "Bitte gib eine gültige E-Mail-Adresse ein." }),
-  password: z.string({ error: "Bitte gib das Passwort ein." }).min(1, "Bitte gib das Passwort ein.").max(1024, "Das Passwort ist zu lang."),
-});
 export type ClubEvent = z.infer<typeof storedEventSchema>;
 export type EventInput = z.infer<typeof eventSchema>;
 

@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { loginSchema, validationMessage } from "@/lib/events";
+import { loginSchema } from "@/lib/account";
+import { validationMessage } from "@/lib/events";
 import { season } from "@/lib/season";
 import { authClient } from "@/lib/auth-client";
 
@@ -106,6 +107,9 @@ export function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <Link href="/admin/passwort-vergessen" className="w-fit text-xs text-primary hover:underline">
+              Passwort vergessen?
+            </Link>
           </Field>
         </FieldGroup>
         <Button

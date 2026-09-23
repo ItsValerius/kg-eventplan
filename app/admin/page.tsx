@@ -4,8 +4,10 @@ import type { Metadata } from "next";
 import { Header, Footer, Main } from "@/components/shell";
 import AdminPanel from "@/components/admin/panel";
 import { AdminFallback } from "@/components/admin/admin-fallback";
+import { Accounts } from "@/components/admin/accounts";
 import { Login } from "@/components/admin/login";
-import { isAdmin } from "@/lib/server/auth";
+import { listAdmins } from "@/lib/server/accounts";
+import { currentAdmin } from "@/lib/server/auth";
 import { readEvents } from "@/lib/server/store";
 export const metadata: Metadata = {
   title: "Terminverwaltung | Knallköpp Golkrath",
@@ -27,14 +29,21 @@ export default function AdminPage() {
 
 async function AdminContent() {
   await connection();
-  if (!(await isAdmin())) return <Login />;
+  const admin = await currentAdmin();
+  if (!admin) return <Login />;
   return (
     <Suspense fallback={<AdminFallback />}>
-      <AdminEvents />
+      <AdminEvents selfId={admin.id} />
     </Suspense>
   );
 }
 
-async function AdminEvents() {
-  return <AdminPanel initialEvents={await readEvents()} />;
+async function AdminEvents({ selfId }: { selfId: string }) {
+  const [events, accounts] = await Promise.all([readEvents(), listAdmins()]);
+  return (
+    <>
+      <AdminPanel initialEvents={events} />
+      <Accounts initialAccounts={accounts} selfId={selfId} />
+    </>
+  );
 }
