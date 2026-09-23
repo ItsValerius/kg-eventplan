@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { LucideProvider } from "lucide-react";
 import "./globals.css";
 import { season } from "@/lib/season";
-import { siteUrl } from "@/lib/structured-data";
+import { siteUrl } from "@/lib/seo/structured-data";
 
 const display = localFont({
   src: "../public/fonts/barlow-condensed-bold.woff2",
@@ -46,7 +47,8 @@ export default function RootLayout({
         >
           Zum Inhalt
         </a>
-        {children}
+        {/* Lucide's default stroke is heavier than the club's line icons. */}
+        <LucideProvider strokeWidth={1.7}>{children}</LucideProvider>
       </body>
     </html>
   );

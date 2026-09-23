@@ -4,7 +4,7 @@ import type { ClubEvent } from "../lib/events";
 const put = vi.fn().mockResolvedValue({ url: "https://example.public.blob.vercel-storage.com/sessionsplan.pdf" });
 vi.mock("@vercel/blob", () => ({ put: (...args: unknown[]) => put(...args) }));
 
-const { regenerateSeasonPlanPdf } = await import("../lib/season-pdf");
+const { regenerateSeasonPlanPdf } = await import("../lib/pdf/season-pdf");
 
 const sampleEvent: ClubEvent = {
   id: "test-1",

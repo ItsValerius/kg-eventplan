@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { formatDate } from "./format";
 import { season } from "./season";
-export { formatDate };
 
 const dateSchema = z
   .string({ error: "Bitte gib ein gültiges Datum ein." })

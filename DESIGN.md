@@ -180,13 +180,16 @@ Small rectangular controls use restrained corners: field and month-selection rou
 ## Components
 
 ### Buttons
-Confident, compact controls. Primary and outline variants share a 45px minimum height, inline icon gap of 12px and the frontmatter padding. Primary hover deepens the green; outline hover uses wash with a stronger border. Text actions use green, no fill and an underline on hover. Danger is a distinct filled delete action. Disabled buttons fade to 0.55 opacity and use a wait cursor. Preserve meaningful labels alongside SVG icons.
+Confident, compact controls. Primary and outline variants share a 45px minimum height, inline icon gap of 12px and the frontmatter padding. Primary hover deepens the green; outline hover uses wash with a stronger border. Text actions use green, no fill and an underline on hover. Danger is a distinct filled delete action. Disabled buttons fade to 0.55 opacity and use a wait cursor. The button doing the work stays solid, swaps its icon for a spinner and names the action in progress (e.g. “Wird gespeichert …”). Preserve meaningful labels alongside SVG icons.
 
 ### Inputs / Fields
 White fields have a fine field-border stroke, field rounding and 12px padding; edit inputs have a 46px minimum height. Validation is German and inline: each invalid field gets the error border and its message directly below, and focus moves to the first one. Keyboard focus is a 3px green outline offset by 4px on every control; the resting outline colour is also green, so colour transitions never flash ink. Error feedback uses the error pair; success uses pale green and deep green. Native selectors and date/time controls retain their platform behavior.
 
 ### Navigation
 The overview integrates the club crest and call into the hero. Administration remains available at `/admin`. The public filter rail initially shows November 2026 through February 2027 as four 56px month tiles, each with its event count in the display face; months without events and months that are already over use the quiet bordered tile. The agenda shows only upcoming events; past events stay reachable through the month tiles, where a month view lists all of that month’s events with past ones muted. Empty states name their case in one line: no events yet, an empty month (future or past tense), no further dates yet, or the session is over. The session ends on Aschermittwoch (10 February 2027). Selecting a tile replaces the overview with that month’s full calendar and filters the list. Only event days are active in the calendar: they are filled pale green, and selecting one opens and scrolls to its row. Today carries a field-border ring; calendar navigation stays within those four months, and a control returns to the month overview and all events.
+
+### Loading
+Placeholders mirror the real layout (month tiles, date-led rows, admin actions) with soft green-tinted bars and a slow sweep. They fade in after 150ms so fast loads never flash them; reduced motion leaves them static.
 
 ### Chips
 Admin publication badges use pale green for published dates and the neutral wash for drafts, with compact padding and tag rounding. They are labels, not filter buttons.

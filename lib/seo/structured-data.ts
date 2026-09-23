@@ -1,5 +1,5 @@
-import type { ClubEvent } from "./events";
-import { isClubEvent } from "./format";
+import type { ClubEvent } from "../events";
+import { isClubEvent } from "../format";
 
 export const siteUrl = "https://sessionsplan.knallkoepp-golkrath.de";
 const club = {
@@ -31,19 +31,22 @@ function organizer(title: string) {
 export function eventsJsonLd(events: ClubEvent[]) {
   return {
     "@context": "https://schema.org",
-    "@graph": events.filter((event) => event.location).map((event) => ({
-      "@type": "Event",
-      name: event.title,
-      startDate: event.time
-        ? `${event.date}T${event.time}:00${berlinOffset(event.date, event.time)}`
-        : event.date,
-      eventStatus: "https://schema.org/EventScheduled",
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      url: `${siteUrl}/#termin-${encodeURIComponent(event.id)}`,
-      image: `${siteUrl}/opengraph-image`,
-      ...(event.description && { description: event.description }),
-      location: { "@type": "Place", name: event.location, address: event.location },
-      ...(organizer(event.title) && { organizer: organizer(event.title) }),
-    })),
+    "@graph": events.filter((event) => event.location).map((event) => {
+      const host = organizer(event.title);
+      return {
+        "@type": "Event",
+        name: event.title,
+        startDate: event.time
+          ? `${event.date}T${event.time}:00${berlinOffset(event.date, event.time)}`
+          : event.date,
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        url: `${siteUrl}/#termin-${encodeURIComponent(event.id)}`,
+        image: `${siteUrl}/opengraph-image`,
+        ...(event.description && { description: event.description }),
+        location: { "@type": "Place", name: event.location, address: event.location },
+        ...(host && { organizer: host }),
+      };
+    }),
   };
 }

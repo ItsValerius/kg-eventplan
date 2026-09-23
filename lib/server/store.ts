@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { asc, eq, sql } from "drizzle-orm";
 import { database } from "@/db/client";
 import { events } from "@/db/schema";
-import type { ClubEvent } from "./events";
+import type { ClubEvent } from "../events";
 
 const eventFields = {
   id: events.id,

@@ -11,17 +11,18 @@ import {
   View,
   renderToBuffer,
 } from "@react-pdf/renderer";
-import { formatDate, sortEvents, type ClubEvent } from "./events";
-import { SESSION_PLAN_BLOB_PATHNAME } from "./season-pdf-path";
-import { season } from "./season";
+import { sortEvents, type ClubEvent } from "../events";
+import { formatDate, groupByMonth, todayInBerlin } from "../format";
+import { SESSION_PLAN_BLOB_PATHNAME } from "./path";
+import { season } from "../season";
+import { siteUrl } from "../seo/structured-data";
 
 Font.register({
   family: "Barlow Condensed Bold",
   src: path.join(process.cwd(), "public/fonts/barlow-condensed-bold.ttf"),
 });
 
-const SITE_URL = "https://sessionsplan.knallkoepp-golkrath.de";
-const SITE_LABEL = "sessionsplan.knallkoepp-golkrath.de";
+const siteLabel = new URL(siteUrl).host;
 
 const GREEN = "#176717";
 const INK = "#17251c";
@@ -75,24 +76,9 @@ const styles = StyleSheet.create({
   },
 });
 
-function monthGroups(events: ClubEvent[]) {
-  const seen = new Set<string>();
-  const groups: string[] = [];
-  for (const event of events) {
-    const month = event.date.slice(0, 7);
-    if (!seen.has(month)) {
-      seen.add(month);
-      groups.push(month);
-    }
-  }
-  return groups;
-}
-
 function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] }) {
   const events = sortEvents(unsortedEvents);
-  const groups = monthGroups(events);
-  const todayInBerlin = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(new Date());
-  const generatedAt = formatDate(todayInBerlin, {
+  const generatedAt = formatDate(todayInBerlin(), {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -112,7 +98,7 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
         </Text>
         <Text style={styles.stand}>
           Stand: {generatedAt} · Aktuelle Termine und Änderungen findest du immer unter{" "}
-          <Link style={styles.link} src={SITE_URL}>{SITE_LABEL}</Link>
+          <Link style={styles.link} src={siteUrl}>{siteLabel}</Link>
         </Text>
 
         {!events.length && (
@@ -124,41 +110,39 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
           </View>
         )}
 
-        {groups.map((month) => (
+        {groupByMonth(events).map(([month, monthEvents]) => (
           <View key={month}>
             <Text style={styles.monthHeading}>
               {formatDate(`${month}-01`, { month: "long", year: "numeric" })}
             </Text>
-            {events
-              .filter((event) => event.date.startsWith(month))
-              .map((event) => (
-                <View key={event.id} style={styles.row} wrap={false}>
-                  <View style={styles.dateColumn}>
-                    <Text style={styles.dateNumber}>{event.date.slice(8)}</Text>
-                    <Text style={styles.weekday}>
-                      {formatDate(event.date, { weekday: "short" }).replace(".", "")}
-                    </Text>
-                  </View>
-                  <View style={styles.content}>
-                    <Text style={styles.title}>{event.title}</Text>
-                    <Text style={styles.meta}>
-                      {event.time ? `${event.time} Uhr` : "Uhrzeit steht noch nicht fest"}
-                      {" · "}
-                      {event.location || "Ort steht noch nicht fest"}
-                    </Text>
-                    {event.description && (
-                      <Text style={styles.description}>{event.description}</Text>
-                    )}
-                  </View>
+            {monthEvents.map((event) => (
+              <View key={event.id} style={styles.row} wrap={false}>
+                <View style={styles.dateColumn}>
+                  <Text style={styles.dateNumber}>{event.date.slice(8)}</Text>
+                  <Text style={styles.weekday}>
+                    {formatDate(event.date, { weekday: "short" }).replace(".", "")}
+                  </Text>
                 </View>
-              ))}
+                <View style={styles.content}>
+                  <Text style={styles.title}>{event.title}</Text>
+                  <Text style={styles.meta}>
+                    {event.time ? `${event.time} Uhr` : "Uhrzeit steht noch nicht fest"}
+                    {" · "}
+                    {event.location || "Ort steht noch nicht fest"}
+                  </Text>
+                  {event.description && (
+                    <Text style={styles.description}>{event.description}</Text>
+                  )}
+                </View>
+              </View>
+            ))}
           </View>
         ))}
 
         <View style={styles.footer} fixed>
           <Text>
             Änderungen vorbehalten. Immer aktuell:{" "}
-            <Link style={styles.link} src={SITE_URL}>{SITE_LABEL}</Link>
+            <Link style={styles.link} src={siteUrl}>{siteLabel}</Link>
           </Text>
           <Text render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>

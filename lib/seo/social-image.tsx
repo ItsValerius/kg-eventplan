@@ -1,17 +1,17 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import path from "node:path";
-import { season } from "./season";
+import { season } from "../season";
 
 export const alt = `Sessionsplan ${season.label} – KG Knallköpp Golkrath`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export async function renderSocialImage() {
-  const [logoData, fontData] = await Promise.all([
-    readFile(path.join(process.cwd(), "public/images/club-logo.png")),
-    readFile(path.join(process.cwd(), "public/fonts/barlow-condensed-bold.ttf")),
-  ]);
+// Synchronous reads keep the image routes prerenderable: async file access would
+// defer them to request time and re-render the PNG on every hit.
+export function renderSocialImage() {
+  const logoData = readFileSync(path.join(process.cwd(), "public/images/club-logo.png"));
+  const fontData = readFileSync(path.join(process.cwd(), "public/fonts/barlow-condensed-bold.ttf"));
   const logoSrc = `data:image/png;base64,${logoData.toString("base64")}`;
 
   return new ImageResponse(

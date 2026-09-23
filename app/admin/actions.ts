@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { updateTag } from "next/cache";
 import {
   checkPassword,
@@ -8,64 +8,33 @@ import {
   cookieName,
   isAdmin,
   newSession,
-} from "@/lib/auth";
-import {
-  eventIdSchema,
-  eventSchema,
-  loginSchema,
-  storedEventSchema,
-  validationMessage,
-  type ClubEvent,
-} from "@/lib/events";
-import { EVENTS_CACHE_TAG } from "@/lib/public-events";
-import { createEvent, deleteEvent, readEvents, updateEvent } from "@/lib/store";
-import { regenerateSeasonPlanPdf } from "@/lib/season-pdf";
+} from "@/lib/server/auth";
+import { eventIdSchema, eventSchema, loginSchema, validationMessage } from "@/lib/events";
+import { clearFailures, clientKey, loginBlocked, recordFailure } from "@/lib/server/login-throttle";
+import { EVENTS_CACHE_TAG } from "@/lib/server/public-events";
+import { createEvent, deleteEvent, readEvents, updateEvent } from "@/lib/server/store";
+import { regenerateSeasonPlanPdf } from "@/lib/pdf/season-pdf";
 
-const WINDOW_MS = 900_000;
-const MAX_FAILURES_PER_CLIENT = 10;
-// The client key comes from forwarding headers, which a client can spoof when
-// self-hosted, so a global cap bounds guessing even if every request uses a new key.
-const MAX_FAILURES_TOTAL = 100;
-const attempts = new Map<string, { count: number; until: number }>();
-let totalFailures = { count: 0, until: 0 };
+// New events arrive without an id; edits carry the id of the stored event.
+const savedEventSchema = eventSchema.extend({ id: eventIdSchema.shape.id.optional() });
+const signedOut = { ok: false as const, error: "Bitte melde dich erneut an." };
+const missingEvent = {
+  ok: false as const,
+  error: "Dieser Termin existiert nicht mehr. Bitte lade die Seite neu.",
+};
 
-async function clientKey() {
-  const list = await headers();
-  return (
-    list.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    list.get("x-real-ip") ||
-    "unknown"
-  );
-}
-
-function loginBlocked(key: string, now: number) {
-  const record = attempts.get(key);
-  return (
-    (record !== undefined && record.until > now && record.count >= MAX_FAILURES_PER_CLIENT) ||
-    (totalFailures.until > now && totalFailures.count >= MAX_FAILURES_TOTAL)
-  );
-}
-
-function recordFailure(key: string, now: number) {
-  for (const [entry, record] of attempts)
-    if (record.until <= now) attempts.delete(entry);
-  const record = attempts.get(key);
-  attempts.set(key, record
-    ? { count: record.count + 1, until: record.until }
-    : { count: 1, until: now + WINDOW_MS });
-  totalFailures = totalFailures.until > now
-    ? { count: totalFailures.count + 1, until: totalFailures.until }
-    : { count: 1, until: now + WINDOW_MS };
-}
-
-async function refreshEventsAndPdf() {
+// Refreshes the public page and regenerates the PDF, returning the admin's updated list.
+async function publishChanges() {
+  updateTag(EVENTS_CACHE_TAG);
   const events = await readEvents();
   try {
     await regenerateSeasonPlanPdf(events.filter((event) => event.published));
   } catch (error) {
     console.error("Sessionsplan-PDF konnte nicht aktualisiert werden:", error);
   }
-  return events;
+  // Again after the upload, so a request made during it can't cache a missing PDF.
+  updateTag(EVENTS_CACHE_TAG);
+  return { ok: true as const, events };
 }
 
 export async function loginAction(input: unknown) {
@@ -90,7 +59,7 @@ export async function loginAction(input: unknown) {
     };
   }
 
-  attempts.delete(key);
+  clearFailures(key);
   (await cookies()).set(cookieName, newSession(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -107,30 +76,19 @@ export async function logoutAction() {
 }
 
 export async function saveEventAction(input: unknown) {
-  if (!(await isAdmin()))
-    return { ok: false as const, error: "Bitte melde dich erneut an." };
-
-  const hasId = typeof input === "object" && input !== null && "id" in input;
-  const parsed = hasId ? storedEventSchema.safeParse(input) : eventSchema.safeParse(input);
+  if (!(await isAdmin())) return signedOut;
+  const parsed = savedEventSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false as const, error: validationMessage(parsed.error) };
 
   try {
-    if (hasId) {
-      const { id, ...event } = parsed.data as ClubEvent;
-      if (!(await updateEvent(id, event)))
-        return {
-          ok: false as const,
-          error: "Dieser Termin existiert nicht mehr. Bitte lade die Seite neu.",
-        };
+    const { id, ...event } = parsed.data;
+    if (id) {
+      if (!(await updateEvent(id, event))) return missingEvent;
     } else {
-      await createEvent(eventSchema.parse(parsed.data));
+      await createEvent(event);
     }
-    updateTag(EVENTS_CACHE_TAG);
-    const events = await refreshEventsAndPdf();
-    // Again after the upload, so a request made during it can't cache a missing PDF.
-    updateTag(EVENTS_CACHE_TAG);
-    return { ok: true as const, events };
+    return await publishChanges();
   } catch (error) {
     console.error("Event save failed:", error);
     return {
@@ -141,23 +99,14 @@ export async function saveEventAction(input: unknown) {
 }
 
 export async function deleteEventAction(input: unknown) {
-  if (!(await isAdmin()))
-    return { ok: false as const, error: "Bitte melde dich erneut an." };
+  if (!(await isAdmin())) return signedOut;
   const parsed = eventIdSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false as const, error: validationMessage(parsed.error) };
 
   try {
-    if (!(await deleteEvent(parsed.data.id)))
-      return {
-        ok: false as const,
-        error: "Dieser Termin existiert nicht mehr. Bitte lade die Seite neu.",
-      };
-    updateTag(EVENTS_CACHE_TAG);
-    const events = await refreshEventsAndPdf();
-    // Again after the upload, so a request made during it can't cache a missing PDF.
-    updateTag(EVENTS_CACHE_TAG);
-    return { ok: true as const, events };
+    if (!(await deleteEvent(parsed.data.id))) return missingEvent;
+    return await publishChanges();
   } catch (error) {
     console.error("Event delete failed:", error);
     return {

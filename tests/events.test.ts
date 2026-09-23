@@ -5,6 +5,7 @@ import {
   loginSchema,
   validationMessage,
 } from "../lib/events";
+import { groupByMonth } from "../lib/format";
 
 const validEvent = {
   title: "Prinzenbiwak",
@@ -54,5 +55,19 @@ describe("deutsche Zod-Validierung", () => {
     expect(login.success).toBe(false);
     if (!id.success) expect(validationMessage(id.error)).toBe("Der Termin fehlt.");
     if (!login.success) expect(validationMessage(login.error)).toBe("Bitte gib das Passwort ein.");
+  });
+});
+
+describe("groupByMonth", () => {
+  it("gruppiert sortierte Termine nach Monat und behält die Reihenfolge", () => {
+    const events = [
+      { id: "a", date: "2026-11-11" },
+      { id: "b", date: "2026-11-28" },
+      { id: "c", date: "2027-01-16" },
+    ];
+    expect(groupByMonth(events)).toEqual([
+      ["2026-11", [events[0], events[1]]],
+      ["2027-01", [events[2]]],
+    ]);
   });
 });

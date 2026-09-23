@@ -14,3 +14,15 @@ export function todayInBerlin(now = new Date()) {
 export function isClubEvent(title: string) {
   return /^(KG\s+)?Knallk(ö|oe)pp\b/i.test(title.trim());
 }
+
+// Events (already sorted by date) grouped under their "YYYY-MM" month, in one pass.
+export function groupByMonth<T extends { date: string }>(events: T[]) {
+  const groups = new Map<string, T[]>();
+  for (const event of events) {
+    const month = event.date.slice(0, 7);
+    const group = groups.get(month);
+    if (group) group.push(event);
+    else groups.set(month, [event]);
+  }
+  return [...groups];
+}

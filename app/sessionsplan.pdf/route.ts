@@ -1,15 +1,9 @@
-import { BlobNotFoundError, head } from "@vercel/blob";
-import { SESSION_PLAN_BLOB_PATHNAME } from "@/lib/season-pdf-path";
+import { sessionPlanBlob } from "@/lib/server/public-events";
 import { season } from "@/lib/season";
 
 export async function GET() {
-  let blob;
-  try {
-    blob = await head(SESSION_PLAN_BLOB_PATHNAME);
-  } catch (error) {
-    if (error instanceof BlobNotFoundError) return new Response("Not found", { status: 404 });
-    throw error;
-  }
+  const blob = await sessionPlanBlob();
+  if (!blob) return new Response("Not found", { status: 404 });
 
   // Bust Vercel Blob's CDN cache on overwrite: the etag changes with content,
   // so appending it forces a fresh fetch instead of a stale cached copy.
