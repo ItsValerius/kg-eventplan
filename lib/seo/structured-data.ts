@@ -29,22 +29,24 @@ function organizer(host: string | null) {
 export function eventsJsonLd(events: ClubEvent[]) {
   return {
     "@context": "https://schema.org",
-    "@graph": events.filter((event) => event.location).map((event) => {
-      const host = organizer(event.host);
-      return {
-        "@type": "Event",
-        name: eventName(event),
-        startDate: event.time
-          ? `${event.date}T${event.time}:00${berlinOffset(event.date, event.time)}`
-          : event.date,
-        eventStatus: "https://schema.org/EventScheduled",
-        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-        url: `${siteUrl}/#termin-${encodeURIComponent(event.id)}`,
-        image: `${siteUrl}/opengraph-image`,
-        ...(event.description && { description: event.description }),
-        location: { "@type": "Place", name: event.location, address: event.location },
-        ...(host && { organizer: host }),
-      };
-    }),
+    "@graph": events
+      .filter((event) => event.location)
+      .map((event) => {
+        const host = organizer(event.host);
+        return {
+          "@type": "Event",
+          name: eventName(event),
+          startDate: event.time
+            ? `${event.date}T${event.time}:00${berlinOffset(event.date, event.time)}`
+            : event.date,
+          eventStatus: "https://schema.org/EventScheduled",
+          eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+          url: `${siteUrl}/#termin-${encodeURIComponent(event.id)}`,
+          image: `${siteUrl}/opengraph-image`,
+          ...(event.description && { description: event.description }),
+          location: { "@type": "Place", name: event.location, address: event.location },
+          ...(host && { organizer: host }),
+        };
+      }),
   };
 }

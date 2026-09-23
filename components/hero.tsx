@@ -8,14 +8,10 @@ export function Hero() {
       <div className="[&_h1]:text-[clamp(2.5rem,12vw,3.1875rem)] [&_h1]:leading-[1.03] md:[&_h1]:text-[65px] lg:[&_h1]:text-[clamp(48px,5.7vw,80px)]">
         <h1>
           Alle Termine der Knallköpp
-          <span className="block text-primary">
-            für die Session {season.label}.
-          </span>
+          <span className="block text-primary">für die Session {season.label}.</span>
         </h1>
       </div>
-      <div
-        className="order-first flex items-center justify-start gap-3 text-left md:order-0 md:justify-end md:gap-4"
-      >
+      <div className="order-first flex items-center justify-start gap-3 text-left md:order-0 md:justify-end md:gap-4">
         <Image
           className="size-14 object-contain md:size-23 lg:size-25.5"
           src="/images/club-logo.png"

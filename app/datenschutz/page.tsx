@@ -81,8 +81,8 @@ export default function DatenschutzPage() {
 
       <h2>Verwaltungsbereich</h2>
       <p>
-        Vereinsmitglieder, die die Termine pflegen, melden sich in einem geschützten Bereich an.
-        Die dabei verarbeiteten Daten betreffen nur sie; sie werden in den{" "}
+        Vereinsmitglieder, die die Termine pflegen, melden sich in einem geschützten Bereich an. Die
+        dabei verarbeiteten Daten betreffen nur sie; sie werden in den{" "}
         <Link href="/admin/datenschutz">Datenschutzhinweisen für den Verwaltungsbereich</Link>{" "}
         erläutert.
       </p>
@@ -99,13 +99,15 @@ export default function DatenschutzPage() {
           Widerspruch gegen Verarbeitungen, die auf unserem berechtigten Interesse beruhen (Art. 21
           DSGVO),
         </li>
-        <li>Widerruf einer erteilten Einwilligung mit Wirkung für die Zukunft (Art. 7 Abs. 3 DSGVO).</li>
+        <li>
+          Widerruf einer erteilten Einwilligung mit Wirkung für die Zukunft (Art. 7 Abs. 3 DSGVO).
+        </li>
       </ul>
       <p>Wenden Sie sich dazu formlos an die oben genannten Kontaktdaten.</p>
       <p>
-        Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77
-        DSGVO). Für uns zuständig ist die Landesbeauftragte für Datenschutz und
-        Informationsfreiheit Nordrhein-Westfalen, Kavalleriestraße 2–4, 40213 Düsseldorf,{" "}
+        Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO).
+        Für uns zuständig ist die Landesbeauftragte für Datenschutz und Informationsfreiheit
+        Nordrhein-Westfalen, Kavalleriestraße 2–4, 40213 Düsseldorf,{" "}
         <a href="https://www.ldi.nrw.de">www.ldi.nrw.de</a>.
       </p>
 

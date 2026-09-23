@@ -6,9 +6,7 @@ const dateSchema = z
   .string({ error: "Bitte gib ein gültiges Datum ein." })
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Bitte gib ein gültiges Datum ein.")
   .refine(
-    (date) =>
-      !Number.isNaN(Date.parse(date)) &&
-      new Date(date).toISOString().slice(0, 10) === date,
+    (date) => !Number.isNaN(Date.parse(date)) && new Date(date).toISOString().slice(0, 10) === date,
     "Bitte gib ein gültiges Datum ein.",
   )
   .refine(
@@ -42,11 +40,18 @@ const locationSchema = z.preprocess(
 );
 export const eventSchema = z.object({
   host: hostSchema,
-  title: z.string({ error: "Bitte gib einen Titel ein." }).trim().min(1, "Bitte gib einen Titel ein.").max(120, "Der Titel darf höchstens 120 Zeichen lang sein."),
+  title: z
+    .string({ error: "Bitte gib einen Titel ein." })
+    .trim()
+    .min(1, "Bitte gib einen Titel ein.")
+    .max(120, "Der Titel darf höchstens 120 Zeichen lang sein."),
   date: dateSchema,
   time: timeSchema,
   location: locationSchema,
-  description: z.string({ error: "Bitte gib eine gültige Beschreibung ein." }).trim().max(2000, "Die Beschreibung darf höchstens 2.000 Zeichen lang sein."),
+  description: z
+    .string({ error: "Bitte gib eine gültige Beschreibung ein." })
+    .trim()
+    .max(2000, "Die Beschreibung darf höchstens 2.000 Zeichen lang sein."),
   published: z.boolean({ error: "Bitte prüfe den Veröffentlichungsstatus." }),
 });
 export const eventIdSchema = z.object({

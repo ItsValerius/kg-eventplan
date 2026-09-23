@@ -220,7 +220,10 @@ export default function AdminPanel({ initialEvents }: { initialEvents: ClubEvent
           <span>Bearbeiten</span>
         </div>
         {groupByMonth(events).map(([month, monthEvents]) => (
-          <section key={month} aria-label={formatDate(`${month}-01`, { month: "long", year: "numeric" })}>
+          <section
+            key={month}
+            aria-label={formatDate(`${month}-01`, { month: "long", year: "numeric" })}
+          >
             <MonthHeading month={month} className="mt-6" />
             {monthEvents.map((event) => {
               const editing = draft?.id === event.id;

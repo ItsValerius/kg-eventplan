@@ -32,9 +32,13 @@ async function create(email: string, name: string) {
     }
     const id = randomUUID();
     await tx.insert(users).values({ id, name, email, emailVerified: true });
-    await tx
-      .insert(accounts)
-      .values({ id: randomUUID(), userId: id, accountId: id, providerId: "credential", password: hash });
+    await tx.insert(accounts).values({
+      id: randomUUID(),
+      userId: id,
+      accountId: id,
+      providerId: "credential",
+      password: hash,
+    });
     console.log(`Admin ${email} angelegt.`);
   });
   console.log(`Passwort (wird nur jetzt angezeigt): ${password}`);

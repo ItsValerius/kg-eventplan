@@ -67,7 +67,9 @@ export const auth = betterAuth({
           const db = database();
           await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
           await db.delete(verifications).where(lt(verifications.expiresAt, new Date()));
-          await db.delete(rateLimits).where(lt(rateLimits.lastRequest, Date.now() - 24 * 60 * 60 * 1000));
+          await db
+            .delete(rateLimits)
+            .where(lt(rateLimits.lastRequest, Date.now() - 24 * 60 * 60 * 1000));
         },
       },
     },

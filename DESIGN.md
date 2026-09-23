@@ -118,6 +118,7 @@ The Vereinskalender gives club life a clear, welcoming visual voice: strong gree
 The design is flat and practical, with pale green selection and restrained borders. Expressive typography carries the celebration; controls remain familiar and plainly labelled. The established green-and-white club identity and its crest remain the durable brand anchors.
 
 **Key Characteristics:**
+
 - Condensed display lettering with ordinary sans-serif reading text.
 - Green actions, pale green selection and white open rows.
 - Date-led alignment with compact supporting metadata.
@@ -128,14 +129,17 @@ The design is flat and practical, with pale green selection and restrained borde
 Club green carries recognition and action; cool white and green-tinted neutrals keep dense date information calm. Frontmatter values are the normative palette.
 
 ### Primary
+
 - **Club Green / Deep Club Green:** primary controls, active navigation, dates and green heading spans; the deeper value is the primary hover state.
 - **Pale Celebration Green:** selected months, successful form feedback and light lettering on the season block.
 
 ### Secondary
+
 - **Publication states:** pale green marks published dates in administration; the neutral wash marks drafts.
 - **Error red:** error feedback and destructive controls; reserve the danger fill for the explicit delete action.
 
 ### Neutral
+
 - **White:** page and field surfaces.
 - **Ink / Muted:** primary text and supporting metadata.
 - **Wash / Line:** quiet form panels, hover surfaces and thin row dividers. Fields, checkboxes and the scrollbar use the stronger field-border tone, which keeps input outlines at 3:1 or more against white and wash (WCAG 1.4.11).
@@ -150,6 +154,7 @@ Club green carries recognition and action; cool white and green-tinted neutrals 
 The display face supplies dense, cheerful weight while the body face makes labels and details practical. This is an observed role hierarchy, not a mathematical modular scale.
 
 ### Hierarchy
+
 - **Display:** primary public heading uses the frontmatter clamp. Login headings use 62px and admin headings 58px on desktop; mobile uses 49px and 42px respectively.
 - **Headline:** section headings use the frontmatter headline role; public schedule headings become 38px on mobile. Form headings use 35px, reducing to 29px on mobile.
 - **Date:** public day numerals use the date role, reducing to 39px on mobile; administration dates use 35px. The public hero states the complete season title in the display face.
@@ -180,29 +185,37 @@ Small rectangular controls use restrained corners: field and month-selection rou
 ## Components
 
 ### Buttons
+
 Confident, compact controls. Primary and outline variants share a 45px minimum height, inline icon gap of 12px and the frontmatter padding. Primary hover deepens the green; outline hover uses wash with a stronger border. Text actions use green, no fill and an underline on hover. Danger is a distinct filled delete action. Disabled buttons fade to 0.55 opacity and use a wait cursor. The button doing the work stays solid, swaps its icon for a spinner and names the action in progress (e.g. “Wird gespeichert …”). Preserve meaningful labels alongside SVG icons.
 
 ### Inputs / Fields
+
 White fields have a fine field-border stroke, field rounding and 12px padding; edit inputs have a 46px minimum height. Validation is German and inline: each invalid field gets the error border and its message directly below, and focus moves to the first one. Keyboard focus is a 3px green outline offset by 4px on every control; the resting outline colour is also green, so colour transitions never flash ink. Error feedback uses the error pair; success uses pale green and deep green. Native selectors and date/time controls retain their platform behavior.
 
 ### Navigation
+
 The overview integrates the club crest and call into the hero. Administration remains available at `/admin`. The public filter rail initially shows November 2026 through February 2027 as four 56px month tiles, each with its event count in the display face; months without events and months that are already over use the quiet bordered tile. The agenda shows only upcoming events; past events stay reachable through the month tiles, where a month view lists all of that month’s events with past ones muted. Empty states name their case in one line: no events yet, an empty month (future or past tense), no further dates yet, or the session is over. The session ends on Aschermittwoch (10 February 2027). Selecting a tile replaces the overview with that month’s full calendar and filters the list. Only event days are active in the calendar: they are filled pale green, and selecting one opens and scrolls to its row. Today carries a field-border ring; calendar navigation stays within those four months, and a control returns to the month overview and all events.
 
 ### Loading
+
 Placeholders mirror the real layout (month tiles, date-led rows, admin actions) with soft green-tinted bars and a slow sweep. They fade in after 150ms so fast loads never flash them; reduced motion leaves them static.
 
 ### Chips
+
 Admin publication badges use pale green for published dates and the neutral wash for drafts, with compact padding and tag rounding. They are labels, not filter buttons.
 
 ### Cards / Containers
+
 The form panel is a wash-filled, line-bordered container with panel rounding, 30px edit-form padding and 36px login padding. Mobile reduces edit padding to 20px 16px and login padding to 26px. The public agenda itself is composed of open rows.
 
 ### Event disclosure
+
 Native details/summary rows combine a leading date, title and metadata with an SVG plus control. The next upcoming date switches its numeral and weekday to the brighter club green, with a bold weekday; it has no fill. Past rows in a month view use muted numerals and titles. Hover adds wash. Opening a row writes its link (#termin-<id>) into the address bar, and opening such a link opens the row, switching to its month when the event is past. Opening adds a faint green surface, rotates the plus 45 degrees and reveals the description aligned under the title. The reveal lasts 0.25s with cubic-bezier(0.16, 1, 0.3, 1); button color transitions last 0.18s. Reduced-motion overrides remove animations, transitions and smooth scrolling, including script-driven scrolling.
 
 ## Do's and Don'ts
 
 ### Do:
+
 - Do preserve the green-and-white identity and existing club crest.
 - Do pair Barlow Condensed headings and dates with the body sans-serif stack.
 - Do keep publication state explicit in administration and hide drafts from public responses.
@@ -210,10 +223,10 @@ Native details/summary rows combine a leading date, title and metadata with an S
 - Do use native disclosure, input and select semantics for familiar interaction.
 
 ### Don't:
+
 - Don't turn the open event agenda into a collection of elevated cards.
 - Don't use decorative eyebrows as a recurring heading style.
 - Don't introduce shadows, gradients or unrelated accent colors into ordinary controls.
-
 
 ## Implementation: shadcn + Tailwind
 

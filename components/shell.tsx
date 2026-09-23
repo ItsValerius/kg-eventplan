@@ -32,19 +32,18 @@ export function Main({
 export function Header() {
   return (
     <header className="border-b border-border">
-      <div className={cn(pageWidth, "flex h-25 items-center justify-between gap-6 max-md:h-20.5 max-md:gap-3")}>
+      <div
+        className={cn(
+          pageWidth,
+          "flex h-25 items-center justify-between gap-6 max-md:h-20.5 max-md:gap-3",
+        )}
+      >
         <Link
-          className="flex items-center gap-3 max-md:gap-2 [&>span]:font-display [&>span]:text-[27px] [&>span]:leading-[1.1] [&>span]:tracking-wide [&>span>span]:mt-1.5 [&>span>span]:block [&>span>span]:font-sans [&>span>span]:text-[11px] [&>span>span]:font-semibold [&>span>span]:tracking-[.12em] max-md:[&>span]:text-[23px] max-md:[&>span>span]:mt-1.25 max-md:[&>span>span]:text-[11px] max-md:[&>img]:size-10.75"
+          className="flex items-center gap-3 max-md:gap-2 max-md:[&>img]:size-10.75 [&>span]:font-display [&>span]:text-[27px] [&>span]:leading-[1.1] [&>span]:tracking-wide max-md:[&>span]:text-[23px] [&>span>span]:mt-1.5 [&>span>span]:block [&>span>span]:font-sans [&>span>span]:text-[11px] [&>span>span]:font-semibold [&>span>span]:tracking-[.12em] max-md:[&>span>span]:mt-1.25 max-md:[&>span>span]:text-[11px]"
           href="/"
           aria-label="Knallköpp Golkrath – zum Sessionsplan"
         >
-          <Image
-            src="/images/club-logo.png"
-            alt=""
-            width={54}
-            height={54}
-            preload
-          />
+          <Image src="/images/club-logo.png" alt="" width={54} height={54} preload />
           <span>
             KNALLKÖPP<span>GOLKRATH · SEIT 1929</span>
           </span>
@@ -55,7 +54,12 @@ export function Header() {
 }
 export function Footer() {
   return (
-    <footer className={cn(pageWidth, "flex items-center justify-between gap-6 border-t border-border pt-6.75 pb-8 text-xs [&>div>span]:text-muted-foreground [&>p]:text-xs [&>p]:italic max-md:flex-wrap max-md:items-start max-md:gap-5 max-md:py-6 max-md:[&>p]:hidden print:hidden")}>
+    <footer
+      className={cn(
+        pageWidth,
+        "flex items-center justify-between gap-6 border-t border-border pt-6.75 pb-8 text-xs max-md:flex-wrap max-md:items-start max-md:gap-5 max-md:py-6 print:hidden [&>div>span]:text-muted-foreground [&>p]:text-xs [&>p]:italic max-md:[&>p]:hidden",
+      )}
+    >
       <div>
         <Link href="/" className="block py-1 font-semibold">
           KG Knallköpp Golkrath e.V.
@@ -63,7 +67,7 @@ export function Footer() {
         <span>Karneval zum Anfassen. Seit 1929.</span>
       </div>
       <p>Jolkere Knall Mött!</p>
-      <div className="flex gap-5 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a:hover]:underline max-md:gap-3.75">
+      <div className="flex gap-5 max-md:gap-3.75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a:hover]:underline">
         <Link href="/impressum">Impressum</Link>
         <Link href="/datenschutz">Datenschutz</Link>
       </div>

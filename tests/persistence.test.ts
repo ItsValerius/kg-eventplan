@@ -28,12 +28,16 @@ describe("Drizzle/PostgreSQL persistence", () => {
   });
 
   afterAll(async () => {
-    await database().delete(events).where(like(events.title, `${prefix}%`));
+    await database()
+      .delete(events)
+      .where(like(events.title, `${prefix}%`));
     await closeDatabase();
   });
 
   it("speichert lokale Datums- und Zeitwerte sowie den Entwurfsstatus", async () => {
-    await database().insert(events).values({ id, ...event });
+    await database()
+      .insert(events)
+      .values({ id, ...event });
     const [stored] = await database().select().from(events).where(eq(events.id, id));
     expect(stored).toMatchObject({
       date: event.date,
@@ -53,13 +57,17 @@ describe("Drizzle/PostgreSQL persistence", () => {
   });
 
   it("verliert bei parallelen Inserts keine Termine", async () => {
-    await Promise.all([0, 1, 2].map((number) =>
-      database().insert(events).values({
-        id: randomUUID(),
-        ...event,
-        title: `${prefix}-parallel-${number}`,
-      }),
-    ));
+    await Promise.all(
+      [0, 1, 2].map((number) =>
+        database()
+          .insert(events)
+          .values({
+            id: randomUUID(),
+            ...event,
+            title: `${prefix}-parallel-${number}`,
+          }),
+      ),
+    );
     const rows = await database()
       .select({ id: events.id })
       .from(events)
@@ -69,11 +77,13 @@ describe("Drizzle/PostgreSQL persistence", () => {
 
   it("erzwingt die Saison auch als Datenbank-Constraint", async () => {
     try {
-      await database().insert(events).values({
-        id: randomUUID(),
-        ...event,
-        date: "2028-01-01",
-      });
+      await database()
+        .insert(events)
+        .values({
+          id: randomUUID(),
+          ...event,
+          date: "2028-01-01",
+        });
       expect.unreachable("Die Datenbank hätte das Datum ablehnen müssen.");
     } catch (error) {
       expect((error as { cause?: { code?: string } }).cause?.code).toBe("23514");

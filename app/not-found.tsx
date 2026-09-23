@@ -13,15 +13,9 @@ export default function NotFound() {
       <Main standalone>
         <h1>Hier ist gerade kein Termin.</h1>
         <p className="my-6">
-          Diese Seite gibt es nicht. Alle Veranstaltungen findest du im
-          Sessionsplan.
+          Diese Seite gibt es nicht. Alle Veranstaltungen findest du im Sessionsplan.
         </p>
-        <Button
-          variant="default"
-          size="default"
-          nativeButton={false}
-          render={<Link href="/" />}
-        >
+        <Button variant="default" size="default" nativeButton={false} render={<Link href="/" />}>
           Zum Sessionsplan
         </Button>
       </Main>

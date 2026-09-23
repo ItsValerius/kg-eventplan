@@ -68,13 +68,16 @@ export function Accounts({
   }
 
   return (
-    <section aria-labelledby="accounts-heading" className="mt-16 border-t border-border pt-10 max-md:mt-12">
+    <section
+      aria-labelledby="accounts-heading"
+      className="mt-16 border-t border-border pt-10 max-md:mt-12"
+    >
       <h2 id="accounts-heading" className="text-[35px] max-md:text-[29px]">
         Zugänge
       </h2>
       <p className="mt-2 max-w-[60ch] text-[13px]">
-        Wer eingeladen wird, bekommt eine E-Mail und legt sein Passwort selbst fest. Der Link ist
-        24 Stunden gültig.
+        Wer eingeladen wird, bekommt eine E-Mail und legt sein Passwort selbst fest. Der Link ist 24
+        Stunden gültig.
       </p>
       {notice && (
         <Alert variant="success" role="status" className="my-5">
@@ -178,7 +181,11 @@ export function Accounts({
         })}
       </ul>
 
-      <form className="mt-8 rounded-xl border border-border bg-muted p-7.5 max-md:px-4 max-md:py-5" noValidate onSubmit={invite}>
+      <form
+        className="mt-8 rounded-xl border border-border bg-muted p-7.5 max-md:px-4 max-md:py-5"
+        noValidate
+        onSubmit={invite}
+      >
         <h3 className="font-sans text-base font-semibold">Jemanden einladen</h3>
         <FieldGroup className="mt-4 grid grid-cols-2 gap-5 max-md:grid-cols-1 max-md:gap-4">
           <Field>
@@ -214,7 +221,11 @@ export function Accounts({
           disabled={busy !== null}
           aria-busy={busy === "invite"}
         >
-          {busy === "invite" ? <Spinner aria-hidden className="size-4.5" /> : <UserPlus size={18} />}
+          {busy === "invite" ? (
+            <Spinner aria-hidden className="size-4.5" />
+          ) : (
+            <UserPlus size={18} />
+          )}
           {busy === "invite" ? "Wird eingeladen …" : "Einladen"}
         </Button>
       </form>

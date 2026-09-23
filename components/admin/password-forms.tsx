@@ -14,7 +14,15 @@ import { validationMessage } from "@/lib/events";
 
 const failed = "Das hat nicht geklappt. Bitte versuche es erneut.";
 
-function Card({ title, intro, children }: { title: string; intro: ReactNode; children: ReactNode }) {
+function Card({
+  title,
+  intro,
+  children,
+}: {
+  title: string;
+  intro: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <div className="max-w-110 rounded-xl border border-border bg-muted p-9 max-md:p-6.5">
       <KeyRound size={28} className="mb-5 text-primary" />
@@ -51,7 +59,13 @@ function Problem({ children }: { children: ReactNode }) {
 
 function BackToLogin() {
   return (
-    <Button variant="link" size="link" className="mt-4" nativeButton={false} render={<Link href="/admin" />}>
+    <Button
+      variant="link"
+      size="link"
+      className="mt-4"
+      nativeButton={false}
+      render={<Link href="/admin" />}
+    >
       Zur Anmeldung <ArrowRight size={15} />
     </Button>
   );
@@ -144,7 +158,8 @@ export function SetPassword() {
         newPassword: parsed.data.password,
         token: token!,
       });
-      if (error?.code === "INVALID_TOKEN") setError("Der Link ist abgelaufen oder wurde schon benutzt.");
+      if (error?.code === "INVALID_TOKEN")
+        setError("Der Link ist abgelaufen oder wurde schon benutzt.");
       else if (error) setError(failed);
       else setDone(true);
     } catch {
@@ -167,7 +182,9 @@ export function SetPassword() {
       ) : done ? (
         <>
           <Alert variant="success" role="status">
-            <AlertDescription>Dein Passwort ist gespeichert. Du kannst dich jetzt anmelden.</AlertDescription>
+            <AlertDescription>
+              Dein Passwort ist gespeichert. Du kannst dich jetzt anmelden.
+            </AlertDescription>
           </Alert>
           <BackToLogin />
         </>
@@ -187,7 +204,9 @@ export function SetPassword() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <FieldDescription className="text-xs">Mindestens {PASSWORD_MIN} Zeichen.</FieldDescription>
+              <FieldDescription className="text-xs">
+                Mindestens {PASSWORD_MIN} Zeichen.
+              </FieldDescription>
             </Field>
             <Field>
               <FieldLabel htmlFor="repeat" className="text-xs font-semibold">

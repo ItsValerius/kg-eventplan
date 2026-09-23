@@ -32,7 +32,9 @@ export async function readPublishedEvents(): Promise<ClubEvent[]> {
 }
 
 export async function createEvent(event: Omit<ClubEvent, "id">) {
-  await database().insert(events).values({ id: randomUUID(), ...event });
+  await database()
+    .insert(events)
+    .values({ id: randomUUID(), ...event });
 }
 
 export async function updateEvent(id: string, event: Omit<ClubEvent, "id">) {

@@ -51,9 +51,7 @@ export function AgendaEmpty({
           <CalendarDays size={28} />
         </EmptyMedia>
         <EmptyTitle className="text-lg font-semibold tracking-normal">{title}</EmptyTitle>
-        {description && (
-          <EmptyDescription className="text-[13px]">{description}</EmptyDescription>
-        )}
+        {description && <EmptyDescription className="text-[13px]">{description}</EmptyDescription>}
       </EmptyHeader>
     </Empty>
   );

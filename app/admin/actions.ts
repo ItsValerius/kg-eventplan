@@ -32,8 +32,7 @@ async function publishChanges() {
 export async function saveEventAction(input: unknown) {
   if (!(await isAdmin())) return signedOut;
   const parsed = savedEventSchema.safeParse(input);
-  if (!parsed.success)
-    return { ok: false as const, error: validationMessage(parsed.error) };
+  if (!parsed.success) return { ok: false as const, error: validationMessage(parsed.error) };
 
   try {
     const { id, ...event } = parsed.data;
@@ -55,8 +54,7 @@ export async function saveEventAction(input: unknown) {
 export async function deleteEventAction(input: unknown) {
   if (!(await isAdmin())) return signedOut;
   const parsed = eventIdSchema.safeParse(input);
-  if (!parsed.success)
-    return { ok: false as const, error: validationMessage(parsed.error) };
+  if (!parsed.success) return { ok: false as const, error: validationMessage(parsed.error) };
 
   try {
     if (!(await deleteEvent(parsed.data.id))) return missingEvent;

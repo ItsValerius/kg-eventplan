@@ -65,7 +65,8 @@ async function readSeedEvents(file?: string): Promise<ClubEvent[]> {
   }
   if (!Array.isArray(source)) throw new Error("Event import must be an array.");
   return source.map((value) => {
-    if (typeof value?.id !== "string" || !value.id) throw new Error("Every imported event needs an ID.");
+    if (typeof value?.id !== "string" || !value.id)
+      throw new Error("Every imported event needs an ID.");
     return withHost({ ...validateEvent(value), id: value.id });
   });
 }

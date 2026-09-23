@@ -11,8 +11,7 @@ const display = localFont({
   display: "swap",
 });
 const title = `Sessionsplan ${season.label} | Knallköpp Golkrath`;
-const description =
-  `Alle Termine der KG Knallköpp Golkrath für die Karnevalssession ${season.label}.`;
+const description = `Alle Termine der KG Knallköpp Golkrath für die Karnevalssession ${season.label}.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -33,11 +32,7 @@ export const metadata: Metadata = {
     description,
   },
 };
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de" className={display.variable}>
       <body>

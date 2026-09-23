@@ -77,7 +77,16 @@ All initial 2026/2027 dates and times are planning data, not a confirmed club sc
 
 ## Checks
 
+Code formatting uses Prettier with two-space indentation and a 100-column target.
+The Tailwind plugin sorts utility classes, including strings in `cn()` and `cva()`,
+using the Tailwind v4 theme in `app/globals.css`.
+Run `pnpm format` to format the project or `pnpm format:check` to check formatting
+without changing files. Generated files, database migrations, and local data are
+excluded. In VS Code, install the recommended Prettier extension to enable the
+project's format-on-save settings. ESLint handles code-quality checks separately.
+
 ```sh
+pnpm format:check
 pnpm lint
 pnpm exec tsc --noEmit
 pnpm build --webpack
@@ -90,7 +99,6 @@ The integration test uses the configured database and cleans up only its uniquel
 
 Club logo: https://www.knallkoepp-golkrath.de/s/misc/logo.png (club-owned, sourced for this requested design).
 Display font: Barlow Condensed Bold, self-hosted from Google Fonts; SIL Open Font License (see `public/fonts/OFL.txt`). The small original logo is retained at its native quality.
-
 
 ## UI development
 

@@ -86,7 +86,10 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
     <Document title={`Sessionsplan ${season.label} – KG Knallköpp Golkrath`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <PdfImage style={styles.logo} src={path.join(process.cwd(), "public/images/club-logo.png")} />
+          <PdfImage
+            style={styles.logo}
+            src={path.join(process.cwd(), "public/images/club-logo.png")}
+          />
           <View>
             <Text style={styles.wordmark}>JOLKERE</Text>
             <Text style={styles.wordmark}>KNALL MÖTT!</Text>
@@ -97,7 +100,9 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
         </Text>
         <Text style={styles.stand}>
           Stand: {generatedAt} · Aktuelle Termine und Änderungen findest du immer unter{" "}
-          <Link style={styles.link} src={siteUrl}>{siteLabel}</Link>
+          <Link style={styles.link} src={siteUrl}>
+            {siteLabel}
+          </Link>
         </Text>
 
         {!events.length && (
@@ -129,9 +134,7 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
                     {" · "}
                     {event.location || "Ort steht noch nicht fest"}
                   </Text>
-                  {event.description && (
-                    <Text style={styles.description}>{event.description}</Text>
-                  )}
+                  {event.description && <Text style={styles.description}>{event.description}</Text>}
                 </View>
               </View>
             ))}
@@ -141,7 +144,9 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
         <View style={styles.footer} fixed>
           <Text>
             Änderungen vorbehalten. Immer aktuell:{" "}
-            <Link style={styles.link} src={siteUrl}>{siteLabel}</Link>
+            <Link style={styles.link} src={siteUrl}>
+              {siteLabel}
+            </Link>
           </Text>
           <Text render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>

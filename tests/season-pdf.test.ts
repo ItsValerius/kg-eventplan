@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ClubEvent } from "../lib/events";
 
-const put = vi.fn().mockResolvedValue({ url: "https://example.public.blob.vercel-storage.com/sessionsplan.pdf" });
+const put = vi
+  .fn()
+  .mockResolvedValue({ url: "https://example.public.blob.vercel-storage.com/sessionsplan.pdf" });
 vi.mock("@vercel/blob", () => ({ put: (...args: unknown[]) => put(...args) }));
 
 // Exercise the Vercel Blob path; locally the PDF would be written to data/.

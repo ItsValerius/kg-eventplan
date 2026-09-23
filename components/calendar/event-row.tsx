@@ -18,7 +18,7 @@ export function EventRow({
     <AccordionItem
       value={event.id}
       id={`termin-${event.id}`}
-      className="border-b border-border data-open:bg-surface-open print:break-inside-avoid"
+      className="border-b border-border print:break-inside-avoid data-open:bg-surface-open"
     >
       <AccordionTrigger
         // The plus below replaces shadcn's chevrons; focus keeps the site-wide outline.
@@ -41,7 +41,7 @@ export function EventRow({
         <span className="flex min-w-0 flex-1 flex-col gap-1.75">
           <span
             className={cn(
-              "text-xl leading-tight font-semibold tracking-tight break-words hyphens-auto max-md:text-lg max-[370px]:text-base",
+              "text-xl leading-tight font-semibold tracking-tight break-words hyphens-auto max-[370px]:text-base max-md:text-lg",
               past && "text-muted-foreground",
             )}
           >

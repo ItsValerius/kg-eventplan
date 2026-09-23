@@ -24,8 +24,12 @@ export default function AdminPrivacyPage() {
 
       <h2>Welche Daten wir verarbeiten</h2>
       <ul>
-        <li>Name und E-Mail-Adresse Ihres Zugangs sowie Ihr Passwort als verschlüsselten Hashwert</li>
-        <li>je Anmeldung eine Sitzung mit Ablaufzeit, IP-Adresse und Browserkennung (User-Agent)</li>
+        <li>
+          Name und E-Mail-Adresse Ihres Zugangs sowie Ihr Passwort als verschlüsselten Hashwert
+        </li>
+        <li>
+          je Anmeldung eine Sitzung mit Ablaufzeit, IP-Adresse und Browserkennung (User-Agent)
+        </li>
         <li>
           zur Abwehr von Passwort-Rateversuchen einen Zähler je IP-Adresse (höchstens zehn
           Anmeldeversuche in 15 Minuten)
@@ -43,9 +47,8 @@ export default function AdminPrivacyPage() {
       <h2>Zweck und Rechtsgrundlage</h2>
       <p>
         Wir verarbeiten die Daten, um Ihnen einen sicheren Zugang zur Terminverwaltung zu geben.
-        Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Wahrnehmung der Vereinsaufgabe) sowie
-        unser berechtigtes Interesse an der Sicherheit des Zugangs nach Art. 6 Abs. 1 lit. f
-        DSGVO.
+        Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Wahrnehmung der Vereinsaufgabe) sowie unser
+        berechtigtes Interesse an der Sicherheit des Zugangs nach Art. 6 Abs. 1 lit. f DSGVO.
       </p>
 
       <h2>Sitzungscookie</h2>
@@ -75,8 +78,8 @@ export default function AdminPrivacyPage() {
         Beim Abmelden wird die Sitzung gelöscht; spätestens nach acht Stunden ist sie ungültig. Ein
         Einladungs- oder Passwort-Link wird mit seiner Verwendung gelöscht. Abgelaufene Sitzungen
         und Links sowie Zähler für Anmeldeversuche, die älter als einen Tag sind, werden bei der
-        nächsten Anmeldung automatisch gelöscht. Ihr Zugang wird gelöscht, sobald Sie keine
-        Termine mehr pflegen.
+        nächsten Anmeldung automatisch gelöscht. Ihr Zugang wird gelöscht, sobald Sie keine Termine
+        mehr pflegen.
       </p>
 
       <p>Stand: September 2026</p>

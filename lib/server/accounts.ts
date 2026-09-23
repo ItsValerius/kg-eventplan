@@ -7,7 +7,11 @@ import { accounts, users } from "@/db/schema";
 export type AdminAccount = { id: string; name: string; email: string; pending: boolean };
 
 // A person has accepted their invitation once they have set a password.
-const passwordSet = and(eq(accounts.userId, users.id), eq(accounts.providerId, "credential"), isNotNull(accounts.password));
+const passwordSet = and(
+  eq(accounts.userId, users.id),
+  eq(accounts.providerId, "credential"),
+  isNotNull(accounts.password),
+);
 
 export async function listAdmins(): Promise<AdminAccount[]> {
   const rows = await database()

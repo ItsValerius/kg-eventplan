@@ -1,0 +1,22 @@
+# Dependencies and generated output
+node_modules/
+.next/
+out/
+build/
+coverage/
+.vercel/
+next-env.d.ts
+*.tsbuildinfo
+pnpm-lock.yaml
+skills-lock.json
+drizzle/
+
+# Local data and agent tooling
+.env*
+data/
+.agents/
+.claude/
+.codex/
+.impeccable/
+AGENTS.md
+CLAUDE.md

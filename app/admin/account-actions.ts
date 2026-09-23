@@ -16,7 +16,8 @@ import { checkMailer } from "@/lib/server/mail";
 const signedOut = { ok: false as const, error: "Bitte melde dich erneut an." };
 const mailFailed = {
   ok: false as const,
-  error: "Die E-Mail konnte nicht gesendet werden. Bitte prüfe die E-Mail-Einstellungen (SMTP_USER, SMTP_PASSWORD).",
+  error:
+    "Die E-Mail konnte nicht gesendet werden. Bitte prüfe die E-Mail-Einstellungen (SMTP_USER, SMTP_PASSWORD).",
 };
 
 // Sends the invitation (a password link) through Better Auth; see account-mail.ts.

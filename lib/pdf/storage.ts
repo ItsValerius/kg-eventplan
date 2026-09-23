@@ -52,6 +52,8 @@ export async function openPdf({ location, version }: StoredPdf): Promise<BodyIni
   if (!onVercel()) return new Uint8Array(await readFile(location));
   // Bust Vercel Blob's CDN cache on overwrite: the etag changes with the content, so
   // appending it forces a fresh fetch instead of a stale cached copy.
-  const upstream = await fetch(`${location}?v=${encodeURIComponent(version)}`, { cache: "no-store" });
+  const upstream = await fetch(`${location}?v=${encodeURIComponent(version)}`, {
+    cache: "no-store",
+  });
   return upstream.ok ? upstream.body : null;
 }

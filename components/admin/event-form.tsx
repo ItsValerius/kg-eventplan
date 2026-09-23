@@ -110,7 +110,12 @@ export function EventForm({
             placeholder="z. B. KG Knallköpp"
           />
         </EventField>
-        <EventField name="title" label="Titel" error={fieldErrors.title} className="max-md:col-span-full">
+        <EventField
+          name="title"
+          label="Titel"
+          error={fieldErrors.title}
+          className="max-md:col-span-full"
+        >
           <Input
             {...fieldProps("title")}
             required
@@ -186,23 +191,11 @@ export function EventForm({
         </Field>
       </FieldGroup>
       <div className="mt-6.5 flex flex-wrap gap-3">
-        <Button
-          type="submit"
-          variant="default"
-          size="default"
-          disabled={busy}
-          aria-busy={busy}
-        >
+        <Button type="submit" variant="default" size="default" disabled={busy} aria-busy={busy}>
           {busy ? "Wird gespeichert …" : "Termin speichern"}
           {busy ? <Spinner aria-hidden className="size-4.5" /> : <Check size={18} />}
         </Button>
-        <Button
-          variant="outline"
-          size="default"
-          type="button"
-          disabled={busy}
-          onClick={onClose}
-        >
+        <Button variant="outline" size="default" type="button" disabled={busy} onClick={onClose}>
           Abbrechen
         </Button>
       </div>

@@ -8,7 +8,7 @@ export function CalendarFallback() {
       role="status"
       aria-label="Kalender wird geladen"
     >
-      <div className="mb-2 grid grid-cols-2 gap-2 border-b md:self-start border-border pb-6">
+      <div className="mb-2 grid grid-cols-2 gap-2 border-b border-border pb-6 md:self-start">
         {[0, 1, 2, 3].map((tile) => (
           <Skeleton key={tile} className="h-14 rounded-md" />
         ))}

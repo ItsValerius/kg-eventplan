@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  eventIdSchema,
-  eventSchema,
-  validationMessage,
-} from "../lib/events";
+import { eventIdSchema, eventSchema, validationMessage } from "../lib/events";
 import { loginSchema } from "../lib/account";
 import { eventName, groupByMonth, isClubEvent } from "../lib/format";
 
@@ -26,8 +22,9 @@ function message(input: unknown) {
 
 describe("deutsche Zod-Validierung", () => {
   it("normalisiert gültige Formulardaten", () => {
-    expect(eventSchema.parse({ ...validEvent, title: "  Prinzenbiwak  " }).title)
-      .toBe("Prinzenbiwak");
+    expect(eventSchema.parse({ ...validEvent, title: "  Prinzenbiwak  " }).title).toBe(
+      "Prinzenbiwak",
+    );
   });
 
   it("erlaubt fehlende Uhrzeit, fehlenden Ort und fehlenden Verein", () => {
@@ -41,7 +38,10 @@ describe("deutsche Zod-Validierung", () => {
     [{ ...validEvent, title: 12 }, "Bitte gib einen Titel ein."],
     [{ ...validEvent, title: "" }, "Bitte gib einen Titel ein."],
     [{ ...validEvent, date: "2027-02-30" }, "Bitte gib ein gültiges Datum ein."],
-    [{ ...validEvent, date: "2028-01-01" }, "Das Datum muss in der Session liegen (September 2026 bis August 2027)."],
+    [
+      { ...validEvent, date: "2028-01-01" },
+      "Das Datum muss in der Session liegen (September 2026 bis August 2027).",
+    ],
     [{ ...validEvent, time: "25:00" }, "Bitte gib eine gültige Uhrzeit ein."],
     [{ ...validEvent, location: "x".repeat(181) }, "Der Ort darf höchstens 180 Zeichen lang sein."],
     [{ ...validEvent, host: "x".repeat(121) }, "Der Verein darf höchstens 120 Zeichen lang sein."],

@@ -6,7 +6,10 @@ export const PASSWORD_LINK_HOURS = 24;
 
 // Better Auth's password-reset link doubles as the invitation: an account without a
 // password is new, so it gets the welcome text instead of the reset text.
-export async function sendPasswordLink({ id, name, email }: { id: string; name: string; email: string }, url: string) {
+export async function sendPasswordLink(
+  { id, name, email }: { id: string; name: string; email: string },
+  url: string,
+) {
   const invited = !(await hasPassword(id));
   const link = `${url}\n\nDer Link ist ${PASSWORD_LINK_HOURS} Stunden gültig und kann nur einmal verwendet werden.`;
   // Art. 13/14 DSGVO: tell the person where their data is explained.

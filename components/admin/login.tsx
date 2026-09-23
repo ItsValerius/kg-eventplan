@@ -15,8 +15,10 @@ import { authClient } from "@/lib/auth-client";
 
 // Better Auth answers wrong credentials with 401 and too many attempts with 429.
 function signInError(status: number) {
-  if (status === 401) return "E-Mail-Adresse oder Passwort stimmen nicht. Bitte versuche es erneut.";
-  if (status === 429) return "Zu viele Versuche. Bitte warte ein paar Minuten und versuche es erneut.";
+  if (status === 401)
+    return "E-Mail-Adresse oder Passwort stimmen nicht. Bitte versuche es erneut.";
+  if (status === 429)
+    return "Zu viele Versuche. Bitte warte ein paar Minuten und versuche es erneut.";
   return "Anmelden fehlgeschlagen. Bitte versuche es erneut.";
 }
 
@@ -48,35 +50,28 @@ export function Login() {
   }
   return (
     <div className="grid grid-cols-[1.15fr_1fr] items-center gap-22.5 pt-10 pb-17.5 max-lg:gap-8.75 max-md:grid-cols-1 max-md:gap-7.5 max-md:py-0">
-      <div className="[&_h1]:text-[62px] [&_h1_span]:text-primary [&_p]:my-6 [&_p]:max-w-[40ch] [&_p]:leading-[1.8] max-lg:[&_h1]:text-[50px] max-md:[&_h1]:text-[49px] max-md:[&_p]:my-4.5 max-md:[&_p]:text-[13px]">
+      <div className="[&_h1]:text-[62px] max-lg:[&_h1]:text-[50px] max-md:[&_h1]:text-[49px] [&_h1_span]:text-primary [&_p]:my-6 [&_p]:max-w-[40ch] [&_p]:leading-[1.8] max-md:[&_p]:my-4.5 max-md:[&_p]:text-[13px]">
         <h1>
           Hinter den Kulissen.
           <br />
           <span>Mitten in der Session.</span>
         </h1>
         <p>
-          Hier entsteht der Sessionsplan. Termine ergänzen, Details
-          aktualisieren und die Vorfreude teilen.
+          Hier entsteht der Sessionsplan. Termine ergänzen, Details aktualisieren und die Vorfreude
+          teilen.
         </p>
-        <Button
-          variant="link"
-          size="link"
-          nativeButton={false}
-          render={<Link href="/" />}
-        >
+        <Button variant="link" size="link" nativeButton={false} render={<Link href="/" />}>
           Zum öffentlichen Sessionsplan <ArrowRight size={20} />
         </Button>
       </div>
       <form
-        className="rounded-xl border border-border bg-muted p-9 [&>svg]:mb-5 [&>svg]:text-primary [&_h2]:text-4xl [&>p]:mt-4 [&>p]:mb-6.25 [&>p]:text-[13px] [&>p]:leading-[1.8] *:data-[slot=button]:mt-4 *:data-[slot=button]:w-full *:data-[slot=button]:justify-between max-md:p-6.5"
+        className="rounded-xl border border-border bg-muted p-9 *:data-[slot=button]:mt-4 *:data-[slot=button]:w-full *:data-[slot=button]:justify-between max-md:p-6.5 [&_h2]:text-4xl [&>p]:mt-4 [&>p]:mb-6.25 [&>p]:text-[13px] [&>p]:leading-[1.8] [&>svg]:mb-5 [&>svg]:text-primary"
         noValidate
         onSubmit={login}
       >
         <LockKeyhole size={28} />
         <h2>Willkommen im Team.</h2>
-        <p>
-          Melde dich an, um die Termine der Session {season.label} zu verwalten.
-        </p>
+        <p>Melde dich an, um die Termine der Session {season.label} zu verwalten.</p>
         <FieldGroup className="gap-4">
           <Field data-invalid={error ? true : undefined}>
             <FieldLabel htmlFor="email" className="text-xs font-semibold">
@@ -107,7 +102,10 @@ export function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Link href="/admin/passwort-vergessen" className="w-fit text-xs text-primary hover:underline">
+            <Link
+              href="/admin/passwort-vergessen"
+              className="w-fit text-xs text-primary hover:underline"
+            >
               Passwort vergessen?
             </Link>
           </Field>
@@ -120,7 +118,11 @@ export function Login() {
           aria-busy={busy || transitioning}
         >
           {busy || transitioning ? "Anmelden …" : "Anmelden"}
-          {busy || transitioning ? <Spinner aria-hidden className="size-4.5" /> : <ArrowRight size={18} />}
+          {busy || transitioning ? (
+            <Spinner aria-hidden className="size-4.5" />
+          ) : (
+            <ArrowRight size={18} />
+          )}
         </Button>
         {error && (
           <Alert id="login-error" variant="destructive" className="my-5 max-md:text-xs">
