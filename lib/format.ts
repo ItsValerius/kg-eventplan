@@ -10,9 +10,14 @@ export function todayInBerlin(now = new Date()) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(now);
 }
 
-// Titles follow "Host – Event"; the club's own entries start with "KG Knallköpp".
-export function isClubEvent(title: string) {
-  return /^(KG\s+)?Knallk(ö|oe)pp\b/i.test(title.trim());
+// The club's own events are hosted by "KG Knallköpp" (or a spelling of it).
+export function isClubEvent(host: string | null) {
+  return host !== null && /^(KG\s+)?Knallk(ö|oe)pp\b/i.test(host.trim());
+}
+
+// How an event is named everywhere it is shown: "Host – Title", or just the title.
+export function eventName({ host, title }: { host: string | null; title: string }) {
+  return host ? `${host} – ${title}` : title;
 }
 
 // Events (already sorted by date) grouped under their "YYYY-MM" month, in one pass.

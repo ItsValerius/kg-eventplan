@@ -50,7 +50,7 @@ export function EventForm({
   draft,
   fieldErrors,
   busy,
-  titleRef,
+  firstFieldRef,
   onUpdate,
   onSubmit,
   onClose,
@@ -58,7 +58,7 @@ export function EventForm({
   draft: Draft;
   fieldErrors: Partial<Record<FieldName, string>>;
   busy: boolean;
-  titleRef: Ref<HTMLInputElement>;
+  firstFieldRef: Ref<HTMLInputElement>;
   onUpdate: (field: FieldName | "published", value: string | boolean | null) => void;
   onSubmit: (event: FormEvent) => void;
   onClose: () => void;
@@ -94,15 +94,30 @@ export function EventForm({
         </Button>
       </div>
       <FieldGroup className="mt-6.25 grid grid-cols-2 gap-5 max-md:gap-x-3 max-md:gap-y-4">
-        <EventField name="title" label="Titel" error={fieldErrors.title} className="col-span-full">
+        <EventField
+          name="host"
+          label="Verein"
+          optional
+          error={fieldErrors.host}
+          className="max-md:col-span-full"
+        >
           <Input
-            ref={titleRef}
+            ref={firstFieldRef}
+            {...fieldProps("host")}
+            maxLength={120}
+            value={draft.host ?? ""}
+            onChange={(e) => onUpdate("host", e.target.value || null)}
+            placeholder="z. B. KG Knallköpp"
+          />
+        </EventField>
+        <EventField name="title" label="Titel" error={fieldErrors.title} className="max-md:col-span-full">
+          <Input
             {...fieldProps("title")}
             required
             maxLength={120}
             value={draft.title}
             onChange={(e) => onUpdate("title", e.target.value)}
-            placeholder="z. B. KG Knallköpp – Biwak"
+            placeholder="z. B. Biwak"
           />
         </EventField>
         <EventField name="date" label="Datum" error={fieldErrors.date}>

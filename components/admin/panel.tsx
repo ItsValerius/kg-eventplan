@@ -35,7 +35,7 @@ export default function AdminPanel({ initialEvents }: { initialEvents: ClubEvent
   const [leaving, setLeaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldName, string>>>({});
-  const titleRef = useRef<HTMLInputElement>(null);
+  const firstFieldRef = useRef<HTMLInputElement>(null);
   const editButtons = useRef(new Map<string, HTMLButtonElement>());
   const keepButtons = useRef(new Map<string, HTMLButtonElement>());
   async function logout() {
@@ -56,7 +56,7 @@ export default function AdminPanel({ initialEvents }: { initialEvents: ClubEvent
   }
   function openForm(event?: ClubEvent, copy = false) {
     if (event && copy) {
-      // A copy keeps title, time, venue and description; the date is what changes.
+      // A copy keeps club, title, time, venue and description; the date is what changes.
       setDraft({ ...event, id: undefined, date: "", published: false });
     } else setDraft(event ? { ...event } : blank(events));
     setDeleting(null);
@@ -67,7 +67,7 @@ export default function AdminPanel({ initialEvents }: { initialEvents: ClubEvent
       document
         .getElementById("event-form")
         ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
-      const target = copy ? document.getElementById("field-date") : titleRef.current;
+      const target = copy ? document.getElementById("field-date") : firstFieldRef.current;
       target?.focus({ preventScroll: true });
     });
   }
@@ -157,7 +157,7 @@ export default function AdminPanel({ initialEvents }: { initialEvents: ClubEvent
       draft={draft}
       fieldErrors={fieldErrors}
       busy={busy}
-      titleRef={titleRef}
+      firstFieldRef={firstFieldRef}
       onUpdate={update}
       onSubmit={save}
       onClose={closeForm}

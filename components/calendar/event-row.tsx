@@ -1,7 +1,7 @@
 import { Clock, MapPin, Plus } from "lucide-react";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { ClubEvent } from "@/lib/events";
-import { formatDate } from "@/lib/format";
+import { eventName, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 // One unfoldable event: date, title and meta in the trigger, the description below.
@@ -45,7 +45,7 @@ export function EventRow({
               past && "text-muted-foreground",
             )}
           >
-            {event.title}
+            {eventName(event)}
           </span>
           <span className="flex flex-wrap gap-x-5 gap-y-1.25 text-[13px] text-muted-foreground max-lg:gap-x-2.5 max-md:flex-col max-md:gap-1.25 [&>span]:flex [&>span]:items-center [&>span]:gap-1.25">
             <span>

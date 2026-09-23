@@ -1,5 +1,5 @@
 import type { ClubEvent } from "../events";
-import { isClubEvent } from "../format";
+import { eventName, isClubEvent } from "../format";
 
 export const siteUrl = "https://sessionsplan.knallkoepp-golkrath.de";
 const club = {
@@ -19,11 +19,9 @@ function berlinOffset(date: string, time: string) {
   return offset?.replace("GMT", "") || "+01:00";
 }
 
-// The host is the part of the title before the dash ("Ratheimer Karnevalsgesellschaft – Biwak").
-function organizer(title: string) {
-  if (isClubEvent(title)) return club;
-  const host = title.split(/\s[–-]\s/)[0]?.trim();
-  return host && host !== title.trim() ? { "@type": "Organization", name: host } : undefined;
+function organizer(host: string | null) {
+  if (isClubEvent(host)) return club;
+  return host ? { "@type": "Organization", name: host } : undefined;
 }
 
 // schema.org events, so search engines can list the dates. Google requires a venue,
@@ -32,10 +30,10 @@ export function eventsJsonLd(events: ClubEvent[]) {
   return {
     "@context": "https://schema.org",
     "@graph": events.filter((event) => event.location).map((event) => {
-      const host = organizer(event.title);
+      const host = organizer(event.host);
       return {
         "@type": "Event",
-        name: event.title,
+        name: eventName(event),
         startDate: event.time
           ? `${event.date}T${event.time}:00${berlinOffset(event.date, event.time)}`
           : event.date,

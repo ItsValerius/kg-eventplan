@@ -4,6 +4,7 @@ import { summarizeEvents, visibleEvents } from "../components/calendar/season-da
 
 const event = (id: string, date: string): ClubEvent => ({
   id,
+  host: null,
   title: id,
   date,
   time: null,

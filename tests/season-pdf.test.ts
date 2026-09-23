@@ -8,6 +8,7 @@ const { regenerateSeasonPlanPdf } = await import("../lib/pdf/season-pdf");
 
 const sampleEvent: ClubEvent = {
   id: "test-1",
+  host: "KG Knallköpp",
   title: "Prinzenbiwak",
   date: "2027-01-24",
   time: "11:11",

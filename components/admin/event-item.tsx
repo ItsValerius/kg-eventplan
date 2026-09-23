@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ReactNode, Ref } from "react";
 import type { ClubEvent } from "@/lib/events";
-import { formatDate } from "@/lib/format";
+import { eventName, formatDate } from "@/lib/format";
 
 // One admin row: event details, publication status, actions and the delete confirmation.
 export function EventItem({
@@ -34,6 +34,7 @@ export function EventItem({
   onDelete: () => void;
   onKeep: () => void;
 }) {
+  const name = eventName(event);
   return (
     <article
       className="grid grid-cols-[1fr_190px_160px] items-center gap-5 border-b border-border py-5 max-lg:grid-cols-[1fr_120px_152px] max-lg:gap-3 max-md:grid-cols-[1fr_auto] max-md:gap-y-3"
@@ -45,7 +46,7 @@ export function EventItem({
         </span>
         <div className="min-w-0">
           <h3 className="break-words hyphens-auto">
-            {event.title}
+            {name}
           </h3>
           <p>
             {formatDate(event.date, {
@@ -76,7 +77,7 @@ export function EventItem({
           variant="outline"
           size="icon"
           disabled={busy}
-          aria-label={`${event.title} bearbeiten`}
+          aria-label={`${name} bearbeiten`}
           aria-expanded={editing}
           onClick={onEdit}
         >
@@ -86,7 +87,7 @@ export function EventItem({
           variant="outline"
           size="icon"
           disabled={busy}
-          aria-label={`${event.title} duplizieren`}
+          aria-label={`${name} duplizieren`}
           onClick={onDuplicate}
         >
           <Copy size={18} />
@@ -96,7 +97,7 @@ export function EventItem({
           size="icon"
           className="text-destructive hover:bg-destructive-surface"
           disabled={busy}
-          aria-label={`${event.title} löschen`}
+          aria-label={`${name} löschen`}
           onClick={onAskDelete}
         >
           <Trash2 size={18} />
@@ -111,7 +112,7 @@ export function EventItem({
           }}
         >
           <p>
-            „{event.title}“ wirklich löschen? Der Termin wird auch aus dem
+            „{name}“ wirklich löschen? Der Termin wird auch aus dem
             öffentlichen Plan entfernt.
           </p>
           <Button

@@ -7,6 +7,7 @@ import type { ClubEvent } from "../events";
 
 const eventFields = {
   id: events.id,
+  host: events.host,
   title: events.title,
   date: sql<string>`to_char(${events.date}, 'YYYY-MM-DD')`,
   time: sql<string | null>`to_char(${events.time}, 'HH24:MI')`,

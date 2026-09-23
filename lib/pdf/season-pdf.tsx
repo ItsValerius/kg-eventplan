@@ -12,7 +12,7 @@ import {
   renderToBuffer,
 } from "@react-pdf/renderer";
 import { sortEvents, type ClubEvent } from "../events";
-import { formatDate, groupByMonth, todayInBerlin } from "../format";
+import { eventName, formatDate, groupByMonth, todayInBerlin } from "../format";
 import { SESSION_PLAN_BLOB_PATHNAME } from "./path";
 import { season } from "../season";
 import { siteUrl } from "../seo/structured-data";
@@ -124,7 +124,7 @@ function SeasonPlanDocument({ events: unsortedEvents }: { events: ClubEvent[] })
                   </Text>
                 </View>
                 <View style={styles.content}>
-                  <Text style={styles.title}>{event.title}</Text>
+                  <Text style={styles.title}>{eventName(event)}</Text>
                   <Text style={styles.meta}>
                     {event.time ? `${event.time} Uhr` : "Uhrzeit steht noch nicht fest"}
                     {" · "}

@@ -13,6 +13,7 @@ for (const file of [".env.local", ".env"]) {
 const prefix = `Integration-${randomUUID()}`;
 const id = randomUUID();
 const event: EventInput = {
+  host: null,
   title: `${prefix}-draft`,
   date: "2027-02-06",
   time: "12:34",

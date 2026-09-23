@@ -23,6 +23,15 @@ const timeSchema = z.preprocess(
     .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Bitte gib eine gültige Uhrzeit ein.")
     .nullable(),
 );
+// The hosting club, e.g. "KG Knallköpp"; empty for events without one.
+const hostSchema = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? null : (value ?? null)),
+  z
+    .string({ error: "Bitte gib einen gültigen Verein ein." })
+    .trim()
+    .max(120, "Der Verein darf höchstens 120 Zeichen lang sein.")
+    .nullable(),
+);
 const locationSchema = z.preprocess(
   (value) => (typeof value === "string" && value.trim() === "" ? null : (value ?? null)),
   z
@@ -32,6 +41,7 @@ const locationSchema = z.preprocess(
     .nullable(),
 );
 export const eventSchema = z.object({
+  host: hostSchema,
   title: z.string({ error: "Bitte gib einen Titel ein." }).trim().min(1, "Bitte gib einen Titel ein.").max(120, "Der Titel darf höchstens 120 Zeichen lang sein."),
   date: dateSchema,
   time: timeSchema,
@@ -55,6 +65,7 @@ export function validationMessage(error: z.ZodError) {
 }
 export const initialEvents: ClubEvent[] = [
   {
+    host: null,
     id: "sample-1",
     title: "Hoppeditzerwachen",
     date: "2026-11-14",
@@ -65,6 +76,7 @@ export const initialEvents: ClubEvent[] = [
     published: false,
   },
   {
+    host: null,
     id: "sample-2",
     title: "Möhnenhängen",
     date: "2027-01-23",
@@ -75,6 +87,7 @@ export const initialEvents: ClubEvent[] = [
     published: false,
   },
   {
+    host: null,
     id: "sample-3",
     title: "Prinzenbiwak",
     date: "2027-01-24",
@@ -85,6 +98,7 @@ export const initialEvents: ClubEvent[] = [
     published: false,
   },
   {
+    host: null,
     id: "sample-4",
     title: "Kindersitzung",
     date: "2027-01-31",
@@ -95,6 +109,7 @@ export const initialEvents: ClubEvent[] = [
     published: false,
   },
   {
+    host: null,
     id: "sample-5",
     title: "Altweiber in Golkrath",
     date: "2027-02-04",
@@ -105,6 +120,7 @@ export const initialEvents: ClubEvent[] = [
     published: false,
   },
   {
+    host: null,
     id: "sample-6",
     title: "Jeck op Kölsch",
     date: "2027-02-05",
@@ -115,6 +131,7 @@ export const initialEvents: ClubEvent[] = [
     published: false,
   },
   {
+    host: null,
     id: "sample-7",
     title: "Rosenmontag im Dorf",
     date: "2027-02-08",
@@ -125,6 +142,7 @@ export const initialEvents: ClubEvent[] = [
     published: false,
   },
   {
+    host: null,
     id: "sample-8",
     title: "Fischessen zum Sessionsausklang",
     date: "2027-02-10",

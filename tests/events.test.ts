@@ -5,9 +5,10 @@ import {
   loginSchema,
   validationMessage,
 } from "../lib/events";
-import { groupByMonth } from "../lib/format";
+import { eventName, groupByMonth, isClubEvent } from "../lib/format";
 
 const validEvent = {
+  host: "KG Knallköpp",
   title: "Prinzenbiwak",
   date: "2027-01-24",
   time: "11:11",
@@ -29,10 +30,11 @@ describe("deutsche Zod-Validierung", () => {
       .toBe("Prinzenbiwak");
   });
 
-  it("erlaubt fehlende Uhrzeit und fehlenden Ort", () => {
-    const result = eventSchema.parse({ ...validEvent, time: null, location: "" });
+  it("erlaubt fehlende Uhrzeit, fehlenden Ort und fehlenden Verein", () => {
+    const result = eventSchema.parse({ ...validEvent, time: null, location: "", host: "  " });
     expect(result.time).toBeNull();
     expect(result.location).toBeNull();
+    expect(result.host).toBeNull();
   });
 
   it.each([
@@ -42,6 +44,7 @@ describe("deutsche Zod-Validierung", () => {
     [{ ...validEvent, date: "2028-01-01" }, "Das Datum muss in der Session liegen (September 2026 bis August 2027)."],
     [{ ...validEvent, time: "25:00" }, "Bitte gib eine gültige Uhrzeit ein."],
     [{ ...validEvent, location: "x".repeat(181) }, "Der Ort darf höchstens 180 Zeichen lang sein."],
+    [{ ...validEvent, host: "x".repeat(121) }, "Der Verein darf höchstens 120 Zeichen lang sein."],
     [{ ...validEvent, description: 42 }, "Bitte gib eine gültige Beschreibung ein."],
     [{ ...validEvent, published: "ja" }, "Bitte prüfe den Veröffentlichungsstatus."],
   ])("liefert eine deutsche Meldung für ungültige Eventdaten", (input, expected) => {
@@ -69,5 +72,28 @@ describe("groupByMonth", () => {
       ["2026-11", [events[0], events[1]]],
       ["2027-01", [events[2]]],
     ]);
+  });
+});
+
+describe("eventName", () => {
+  it("setzt Verein und Titel wie bisher zusammen", () => {
+    expect(eventName({ host: "Ratheimer Karnevalsgesellschaft", title: "Biwak" })).toBe(
+      "Ratheimer Karnevalsgesellschaft – Biwak",
+    );
+  });
+
+  it("zeigt ohne Verein nur den Titel", () => {
+    expect(eventName({ host: null, title: "Hoppeditzerwachen" })).toBe("Hoppeditzerwachen");
+  });
+});
+
+describe("isClubEvent", () => {
+  it.each([
+    ["KG Knallköpp", true],
+    ["Knallkoepp Golkrath", true],
+    ["KG Eierköpp Baal", false],
+    [null, false],
+  ])("erkennt eigene Termine am Verein (%s)", (host, expected) => {
+    expect(isClubEvent(host)).toBe(expected);
   });
 });
