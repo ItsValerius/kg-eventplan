@@ -10,6 +10,7 @@ Requires Node.js 20.12+ and Docker with Compose.
 pnpm install
 cp .env.example .env.local  # first setup only; preserve any existing secrets
 pnpm db:up
+pnpm mail:up
 pnpm db:migrate
 pnpm db:seed
 pnpm dev
@@ -25,7 +26,7 @@ pnpm admin:create you@example.com "Your Name"
 
 The command prints a generated password once. Running it again for the same address sets a new password and ends that admin's sessions; `pnpm admin:remove you@example.com` deletes the account. There is no public sign-up.
 
-After that, admins manage access themselves under **Zugänge** on `/admin`: an invitation creates the account and emails a link (valid 24 hours) with which the person sets their own password; the login page offers **Passwort vergessen?** with the same kind of link. Email goes out through the club's IONOS mailbox (`SMTP_USER`, `SMTP_PASSWORD`). To try it locally, run Mailpit (`docker run --rm -p 1025:1025 -p 8025:8025 axllent/mailpit --smtp-auth-accept-any --smtp-auth-allow-insecure`) and set `SMTP_HOST=localhost`, `SMTP_PORT=1025`; the emails appear at http://localhost:8025. `pnpm admin:create` stays available for when no admin can sign in.
+After that, admins manage access themselves under **Zugänge** on `/admin`: an invitation creates the account and emails a link (valid 24 hours) with which the person sets their own password; the login page offers **Passwort vergessen?** with the same kind of link. Email goes out through the club's IONOS mailbox (`SMTP_USER`, `SMTP_PASSWORD`). Locally, `pnpm mail:up` starts a Mailpit container that catches every email instead of sending it; `.env.example` points `SMTP_HOST`/`SMTP_PORT` at it, and the inbox is at http://localhost:8025. `pnpm admin:create` stays available for when no admin can sign in.
 
 ## Database and existing dates
 

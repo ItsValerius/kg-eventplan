@@ -10,6 +10,7 @@
     "lint": "eslint",
     "db:up": "docker compose up -d --wait db",
     "db:down": "docker compose down",
+    "mail:up": "docker compose up -d --wait mail",
     "db:migrate": "tsx scripts/db.ts migrate",
     "db:deploy": "tsx scripts/db.ts deploy",
     "db:seed": "tsx scripts/db.ts seed",
