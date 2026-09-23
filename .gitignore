@@ -45,5 +45,6 @@ next-env.d.ts
 !.env.example
 
 .agents/
+.claude/
 .codex/
 .impeccable/
