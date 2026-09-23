@@ -1,4 +1,4 @@
-import { Clock, MapPin, Plus } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { ClubEvent } from "@/lib/events";
 import { eventName, formatDate } from "@/lib/format";
@@ -58,8 +58,25 @@ export function EventRow({
             </span>
           </span>
         </span>
-        <span className="grid size-7.5 shrink-0 place-items-center rounded-full text-primary transition-[transform,background] duration-250 ease-out group-aria-expanded/accordion-trigger:rotate-45 group-aria-expanded/accordion-trigger:bg-accent print:hidden">
-          <Plus size={20} />
+        <span className="grid size-7.5 shrink-0 place-items-center rounded-full text-primary transition-[background] duration-250 ease-out group-aria-expanded/accordion-trigger:bg-accent print:hidden">
+          {/* Plus morphs into minus: the icon half-turns while its vertical bar folds flat. */}
+          <svg
+            viewBox="0 0 24 24"
+            width={20}
+            height={20}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            aria-hidden
+            className="transition-transform duration-300 ease-[cubic-bezier(0.65,0,0.35,1)] group-aria-expanded/accordion-trigger:rotate-180"
+          >
+            <path d="M5 12h14" />
+            <path
+              d="M12 5v14"
+              className="origin-center transition-transform duration-300 ease-[cubic-bezier(0.65,0,0.35,1)] group-aria-expanded/accordion-trigger:rotate-90"
+            />
+          </svg>
         </span>
       </AccordionTrigger>
       <AccordionContent className="pr-15 pb-6 pl-19.5 max-lg:pr-6 max-lg:pl-17.5 max-md:pr-4 max-md:pb-5.5 max-md:pl-14.25 [&_p]:max-w-[65ch] [&_p]:text-[13px] [&_p]:leading-[1.75] max-md:[&_p]:text-xs">
