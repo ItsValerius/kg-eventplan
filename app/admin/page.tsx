@@ -5,7 +5,7 @@ import { Header, Footer, Main } from "@/components/shell";
 import AdminPanel from "@/components/admin/panel";
 import { AdminFallback } from "@/components/admin/admin-fallback";
 import { Login } from "@/components/admin/login";
-import { configured, demoMode, isAdmin } from "@/lib/server/auth";
+import { isAdmin } from "@/lib/server/auth";
 import { readEvents } from "@/lib/server/store";
 export const metadata: Metadata = {
   title: "Terminverwaltung | Knallköpp Golkrath",
@@ -27,7 +27,7 @@ export default function AdminPage() {
 
 async function AdminContent() {
   await connection();
-  if (!(await isAdmin())) return <Login configured={configured} demo={demoMode} />;
+  if (!(await isAdmin())) return <Login />;
   return (
     <Suspense fallback={<AdminFallback />}>
       <AdminEvents />

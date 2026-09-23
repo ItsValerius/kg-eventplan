@@ -50,7 +50,7 @@ describe("deutsche Zod-Validierung", () => {
 
   it("übersetzt ID- und Loginfehler", () => {
     const id = eventIdSchema.safeParse({ id: 3 });
-    const login = loginSchema.safeParse({ password: "" });
+    const login = loginSchema.safeParse({ email: "admin@example.com", password: "" });
     expect(id.success).toBe(false);
     expect(login.success).toBe(false);
     if (!id.success) expect(validationMessage(id.error)).toBe("Der Termin fehlt.");

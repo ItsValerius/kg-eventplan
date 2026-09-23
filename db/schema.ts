@@ -21,3 +21,5 @@ export const events = pgTable("events", {
 
 export type EventRow = typeof events.$inferSelect;
 export type NewEventRow = typeof events.$inferInsert;
+
+export * from "./auth-schema";

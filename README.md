@@ -17,7 +17,13 @@ pnpm dev
 
 PostgreSQL 17 runs on `127.0.0.1:5433` with a named Docker volume. `.env.example` contains the matching local-only connection string. `pnpm db:down` stops the database without deleting the volume; `pnpm db:up` starts it again. Do not use `docker compose down -v` unless you intend to erase the database.
 
-Without `ADMIN_PASSWORD`, development enables an explicitly labeled demo login. Use **Demo-Passwort einsetzen** on `/admin`, then **Anmelden**. Demo password: `knallkoepp-demo`. This fallback is disabled in production.
+Set `BETTER_AUTH_SECRET` in `.env.local` (`openssl rand -base64 32`), then create an admin account for `/admin`:
+
+```sh
+pnpm admin:create you@example.com "Your Name"
+```
+
+The command prints a generated password once. Running it again for the same address sets a new password and ends that admin's sessions; `pnpm admin:remove you@example.com` deletes the account. There is no public sign-up.
 
 ## Database and existing dates
 
@@ -44,10 +50,12 @@ Visitors can download the full published event list as a branded PDF. It is not 
 
 ## Production
 
-Set `DATABASE_URL` to your persistent PostgreSQL database, configure a strong `ADMIN_PASSWORD` and random `ADMIN_SESSION_SECRET`, and connect a Vercel Blob store (provides `BLOB_READ_WRITE_TOKEN`) for the season plan PDF, then run:
+Set `DATABASE_URL` to your persistent PostgreSQL database, set a random `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), and connect a Vercel Blob store (provides `BLOB_READ_WRITE_TOKEN`) for the season plan PDF, then run:
 
 ```sh
 pnpm db:migrate
+# Create each admin (prints a one-time password):
+DATABASE_URL=… pnpm admin:create admin@example.com "Name"
 # On the first deployment only, import the approved initial data if desired:
 pnpm db:seed /absolute/path/events.json
 pnpm build --webpack
@@ -56,9 +64,9 @@ pnpm start
 
 The database must be reachable during the build to prerender the calendar. The included Compose credentials are for local development; use separate production credentials, database backups, and the TLS settings required by your database provider. Back up PostgreSQL, not the old JSON file.
 
-Use HTTPS (production authentication uses secure cookies). Sessions last eight hours. Next.js Server Actions perform their built-in origin checks, and every mutation independently requires a valid admin session. The app disables admin login if no production password is configured.
+Admin login uses [Better Auth](https://better-auth.com) (`lib/server/auth.ts`) with personal email and password accounts stored in PostgreSQL (`db/auth-schema.ts`). Passwords are hashed with scrypt; sessions live in the database for eight hours (refreshed hourly while in use), so signing out or removing an admin ends them at once. Cookies are `httpOnly`, `SameSite=Lax` and secure over HTTPS. Sign-in goes through `/api/auth`, which checks the request origin and limits each client IP to 10 attempts per 15 minutes; the counters live in PostgreSQL, so the limit holds across serverless instances. Only this site's own hosts (production, the current Vercel deployment and branch URLs, localhost) are accepted as the auth base URL. Next.js Server Actions perform their built-in origin checks, and every mutation independently requires a valid admin session. Better Auth refuses to start in production without `BETTER_AUTH_SECRET`.
 
-The default Next.js cache and login rate limiter are local to an app instance. For multiple replicas, configure a shared Next.js cache handler with coordinated tag invalidation and distributed rate limiting. PostgreSQL is already shared; adding replicas alone does not coordinate their caches.
+The default Next.js cache is local to an app instance. For multiple replicas, configure a shared Next.js cache handler with coordinated tag invalidation. PostgreSQL is already shared; adding replicas alone does not coordinate their caches.
 
 All initial 2026/2027 dates and times are planning data, not a confirmed club schedule. The migration converts them to unpublished drafts. New events also start as drafts; enable **Termin veröffentlichen** only when a date should appear on the public overview.
 

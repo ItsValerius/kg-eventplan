@@ -3,25 +3,32 @@ import { ArrowRight, LockKeyhole } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginSchema, validationMessage } from "@/lib/events";
 import { season } from "@/lib/season";
-import { loginAction } from "@/app/admin/actions";
-import { errorMessage } from "./error-message";
+import { authClient } from "@/lib/auth-client";
 
-export function Login({ configured, demo }: { configured: boolean; demo: boolean }) {
+// Better Auth answers wrong credentials with 401 and too many attempts with 429.
+function signInError(status: number) {
+  if (status === 401) return "E-Mail-Adresse oder Passwort stimmen nicht. Bitte versuche es erneut.";
+  if (status === 429) return "Zu viele Versuche. Bitte warte ein paar Minuten und versuche es erneut.";
+  return "Anmelden fehlgeschlagen. Bitte versuche es erneut.";
+}
+
+export function Login() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [transitioning, startTransition] = useTransition();
   async function login(event: FormEvent) {
     event.preventDefault();
-    const credentials = loginSchema.safeParse({ password });
+    const credentials = loginSchema.safeParse({ email, password });
     if (!credentials.success) {
       setError(validationMessage(credentials.error));
       return;
@@ -29,11 +36,11 @@ export function Login({ configured, demo }: { configured: boolean; demo: boolean
     setBusy(true);
     setError("");
     try {
-      const result = await loginAction(credentials.data);
-      if (!result.ok) throw new Error(result.error);
-      startTransition(() => router.refresh());
-    } catch (e) {
-      setError(errorMessage(e, "Anmelden fehlgeschlagen. Bitte versuche es erneut."));
+      const { error } = await authClient.signIn.email(credentials.data);
+      if (error) setError(signInError(error.status));
+      else startTransition(() => router.refresh());
+    } catch {
+      setError(signInError(0));
     } finally {
       setBusy(false);
     }
@@ -69,61 +76,52 @@ export function Login({ configured, demo }: { configured: boolean; demo: boolean
         <p>
           Melde dich an, um die Termine der Session {season.label} zu verwalten.
         </p>
-        {!configured ? (
-          <Alert variant="destructive" className="my-5 max-md:text-xs">
-            <AlertDescription>
-              Der Admin-Zugang ist noch nicht eingerichtet. Hinterlege
-              ADMIN_PASSWORD in der Server-Konfiguration.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <>
-            <Field data-invalid={error ? true : undefined}>
-              <FieldLabel htmlFor="password" className="text-xs font-semibold">
-                Admin-Passwort
-              </FieldLabel>
-              <Input
-                id="password"
-                aria-invalid={error ? true : undefined}
-                aria-describedby={error ? "login-error" : undefined}
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Dein Passwort"
-              />
-            </Field>
-            <Button
-              type="submit"
-              variant="default"
-              size="default"
-              disabled={busy || transitioning}
-              aria-busy={busy || transitioning}
-            >
-              {busy || transitioning ? "Anmelden …" : "Anmelden"}
-              {busy || transitioning ? <Spinner aria-hidden className="size-4.5" /> : <ArrowRight size={18} />}
-            </Button>
-          </>
-        )}
+        <FieldGroup className="gap-4">
+          <Field data-invalid={error ? true : undefined}>
+            <FieldLabel htmlFor="email" className="text-xs font-semibold">
+              E-Mail-Adresse
+            </FieldLabel>
+            <Input
+              id="email"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "login-error" : undefined}
+              type="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
+          <Field data-invalid={error ? true : undefined}>
+            <FieldLabel htmlFor="password" className="text-xs font-semibold">
+              Passwort
+            </FieldLabel>
+            <Input
+              id="password"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "login-error" : undefined}
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
+        </FieldGroup>
+        <Button
+          type="submit"
+          variant="default"
+          size="default"
+          disabled={busy || transitioning}
+          aria-busy={busy || transitioning}
+        >
+          {busy || transitioning ? "Anmelden …" : "Anmelden"}
+          {busy || transitioning ? <Spinner aria-hidden className="size-4.5" /> : <ArrowRight size={18} />}
+        </Button>
         {error && (
           <Alert id="login-error" variant="destructive" className="my-5 max-md:text-xs">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-        )}
-        {demo && (
-          <div className="mt-6.5 border-t border-border pt-5 text-[11px] [&_p]:mt-1.25 **:data-[slot=button]:text-[11px]">
-            <strong>Lokale Design-Demo</strong>
-            <p>Zum Ausprobieren der Terminverwaltung:</p>
-            <Button
-              type="button"
-              variant="link"
-              size="link"
-              onClick={() => setPassword("knallkoepp-demo")}
-            >
-              Demo-Passwort einsetzen <ArrowRight size={15} />
-            </Button>
-          </div>
         )}
       </form>
     </div>

@@ -1,16 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { updateTag } from "next/cache";
-import {
-  checkPassword,
-  configured,
-  cookieName,
-  isAdmin,
-  newSession,
-} from "@/lib/server/auth";
-import { eventIdSchema, eventSchema, loginSchema, validationMessage } from "@/lib/events";
-import { clearFailures, clientKey, loginBlocked, recordFailure } from "@/lib/server/login-throttle";
+import { isAdmin } from "@/lib/server/auth";
+import { eventIdSchema, eventSchema, validationMessage } from "@/lib/events";
 import { EVENTS_CACHE_TAG } from "@/lib/server/public-events";
 import { createEvent, deleteEvent, readEvents, updateEvent } from "@/lib/server/store";
 import { regenerateSeasonPlanPdf } from "@/lib/pdf/season-pdf";
@@ -35,44 +27,6 @@ async function publishChanges() {
   // Again after the upload, so a request made during it can't cache a missing PDF.
   updateTag(EVENTS_CACHE_TAG);
   return { ok: true as const, events };
-}
-
-export async function loginAction(input: unknown) {
-  if (!configured)
-    return { ok: false as const, error: "Der Admin-Zugang ist noch nicht eingerichtet." };
-  const parsed = loginSchema.safeParse(input);
-  if (!parsed.success)
-    return { ok: false as const, error: validationMessage(parsed.error) };
-
-  const key = await clientKey();
-  const now = Date.now();
-  if (loginBlocked(key, now))
-    return {
-      ok: false as const,
-      error: "Zu viele Versuche. Bitte versuche es in 15 Minuten erneut.",
-    };
-  if (!checkPassword(parsed.data.password)) {
-    recordFailure(key, now);
-    return {
-      ok: false as const,
-      error: "Das Passwort stimmt nicht. Bitte versuche es erneut.",
-    };
-  }
-
-  clearFailures(key);
-  (await cookies()).set(cookieName, newSession(), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-    maxAge: 28_800,
-  });
-  return { ok: true as const };
-}
-
-export async function logoutAction() {
-  (await cookies()).delete(cookieName);
-  return { ok: true as const };
 }
 
 export async function saveEventAction(input: unknown) {

@@ -17,7 +17,8 @@ import { eventSchema, validationMessage, type ClubEvent } from "@/lib/events";
 import { formatDate, groupByMonth } from "@/lib/format";
 import { MonthHeading } from "../month-heading";
 import { scrollBehavior } from "../motion";
-import { deleteEventAction, logoutAction, saveEventAction } from "@/app/admin/actions";
+import { deleteEventAction, saveEventAction } from "@/app/admin/actions";
+import { authClient } from "@/lib/auth-client";
 import { season } from "@/lib/season";
 import { blank, fieldOrder, type Draft, type FieldName } from "./draft";
 import { EventForm } from "./event-form";
@@ -42,8 +43,8 @@ export default function AdminPanel({ initialEvents }: { initialEvents: ClubEvent
     setLeaving(true);
     setError("");
     try {
-      const result = await logoutAction();
-      if (!result.ok) throw new Error();
+      const { error } = await authClient.signOut();
+      if (error) throw new Error();
       setDraft(null);
       startTransition(() => router.refresh());
     } catch (e) {
