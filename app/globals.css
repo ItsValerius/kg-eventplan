@@ -172,4 +172,8 @@
     animation: none !important;
     transition: none !important;
   }
+  /* A frozen spinner reads as a hang; keep loading indicators turning, just slower. */
+  [data-slot="spinner"] {
+    animation: spin 2s linear infinite !important;
+  }
 }
