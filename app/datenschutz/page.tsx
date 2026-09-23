@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ClubAddress, LegalPage } from "@/components/legal-page";
 import { siteUrl } from "@/lib/seo/structured-data";
 
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
 
 const host = new URL(siteUrl).host;
 
+// What visitors need to know. Processing that only concerns admins (login, invitations,
+// email, database) is explained to them separately on /admin/datenschutz.
 export default function DatenschutzPage() {
   return (
     <LegalPage title="Datenschutz­erklärung">
@@ -23,23 +26,20 @@ export default function DatenschutzPage() {
 
       <h2>Das Wichtigste in Kürze</h2>
       <ul>
-        <li>Die Seite verwendet für Besucher keine Cookies und speichert nichts auf Ihrem Gerät.</li>
+        <li>Die Seite setzt für Besucher keine Cookies und speichert nichts auf Ihrem Gerät.</li>
         <li>Es gibt kein Tracking, keine Analyse-Werkzeuge und keine Werbung.</li>
         <li>
           Schriften, Bilder und das Vereinswappen werden von dieser Seite selbst ausgeliefert; beim
           Aufruf werden keine Inhalte von Drittanbietern geladen.
         </li>
-        <li>
-          Personenbezogene Daten fallen nur technisch beim Aufruf (Server-Logs) und bei der
-          Anmeldung von Vereinsmitgliedern im Verwaltungsbereich an.
-        </li>
+        <li>Personenbezogene Daten fallen nur technisch beim Aufruf an (Server-Logs).</li>
       </ul>
 
       <h2>Hosting und Server-Logs</h2>
       <p>
         Die Seite wird bei Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, USA
-        betrieben. Beim Aufruf verarbeitet Vercel technisch notwendige Daten, die Ihr Browser
-        übermittelt:
+        betrieben. Beim Aufruf, auch beim Herunterladen des Sessionsplans als PDF, verarbeitet
+        Vercel technisch notwendige Daten, die Ihr Browser übermittelt:
       </p>
       <ul>
         <li>IP-Adresse</li>
@@ -64,79 +64,6 @@ export default function DatenschutzPage() {
         <a href="https://vercel.com/legal/privacy-notice">vercel.com/legal/privacy-notice</a>.
       </p>
 
-      <h2>Sessionsplan als PDF</h2>
-      <p>
-        Der Download des Sessionsplans läuft über diese Seite. Dabei fallen nur die oben
-        beschriebenen Server-Logs an; weitere Daten werden nicht erhoben.
-      </p>
-
-      <h2>Cookies und Speicherung auf Ihrem Gerät</h2>
-      <p>
-        Für Besucher setzt diese Seite keine Cookies und nutzt weder Local Storage noch
-        vergleichbare Techniken. Eine Einwilligung ist daher nicht erforderlich.
-      </p>
-      <p>
-        Nur wenn sich Vereinsmitglieder im Verwaltungsbereich anmelden, wird ein Sitzungscookie
-        gesetzt (<code>__Secure-better-auth.session_token</code>). Es hält die Anmeldung für höchstens
-        acht Stunden aufrecht und ist für diesen ausdrücklich gewünschten Dienst unbedingt
-        erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
-      </p>
-
-      <h2>Anmeldung im Verwaltungsbereich</h2>
-      <p>
-        Der Verwaltungsbereich ist nur für berechtigte Vereinsmitglieder zugänglich, die die
-        Termine pflegen. Dafür verarbeiten wir:
-      </p>
-      <ul>
-        <li>Name und E-Mail-Adresse des Zugangs sowie das Passwort als verschlüsselten Hashwert</li>
-        <li>
-          für Einladungen und „Passwort vergessen“ einen einmal verwendbaren Link, der 24 Stunden
-          gültig ist
-        </li>
-        <li>
-          je Anmeldung eine Sitzung mit Ablaufzeit, IP-Adresse und Browserkennung (User-Agent)
-        </li>
-        <li>
-          zur Abwehr von Passwort-Rateversuchen einen Zähler je IP-Adresse (höchstens zehn
-          Anmeldeversuche in 15 Minuten)
-        </li>
-      </ul>
-      <p>
-        Zweck ist ein sicherer Zugang zur Terminverwaltung. Rechtsgrundlage ist Art. 6 Abs. 1
-        lit. b DSGVO (Wahrnehmung der Vereinsaufgabe) sowie unser berechtigtes Interesse an der
-        Sicherheit des Zugangs nach Art. 6 Abs. 1 lit. f DSGVO.
-      </p>
-      <p>
-        Beim Abmelden wird die Sitzung gelöscht; spätestens nach acht Stunden ist sie ungültig.
-        Ein Link wird mit seiner Verwendung gelöscht. Abgelaufene Sitzungen und Links sowie
-        Zähler, die älter als einen Tag sind, werden bei der nächsten Anmeldung automatisch
-        gelöscht. Der Zugang selbst wird gelöscht, sobald die Person keine
-        Termine mehr pflegt.
-      </p>
-
-      <h2>E-Mail-Versand</h2>
-      <p>
-        Einladungen und Links zum Festlegen eines Passworts versenden wir über das E-Mail-Postfach
-        des Vereins bei der IONOS SE, Elgendorfer Straße 57, 56410 Montabaur. Dabei werden Name
-        und E-Mail-Adresse der eingeladenen Person sowie der Inhalt der E-Mail verarbeitet. IONOS
-        ist als Auftragsverarbeiter tätig (Art. 28 DSGVO); die Server stehen in Deutschland bzw.
-        der EU. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO.
-      </p>
-
-      <h2>Datenbank</h2>
-      <p>
-        Termine und die Daten der Zugänge speichern wir in einer Datenbank von Neon, LLC, einem
-        Unternehmen der Databricks, Inc., 160 Spear Street, Suite 1300, San Francisco, CA 94105,
-        USA. Die Datenbank liegt in Frankfurt am Main (AWS-Region eu-central-1). Neon verarbeitet
-        die Daten in unserem Auftrag (Art. 28 DSGVO). Soweit dabei ein Zugriff aus den USA
-        möglich ist, ist Neon über Databricks nach dem EU-US Data Privacy Framework zertifiziert
-        (Art. 45 DSGVO). Weitere Informationen:{" "}
-        <a href="https://www.databricks.com/legal/privacynotice">
-          databricks.com/legal/privacynotice
-        </a>
-        .
-      </p>
-
       <h2>Kontakt per E-Mail</h2>
       <p>
         Wenn Sie uns per E-Mail kontaktieren, verarbeiten wir Ihre Angaben (etwa Name,
@@ -150,6 +77,14 @@ export default function DatenschutzPage() {
       <p>
         Diese Seite verlinkt auf die Website des Vereins und auf Websites Dritter. Erst wenn Sie
         einem Link folgen, gelten die Datenschutzhinweise des jeweiligen Anbieters.
+      </p>
+
+      <h2>Verwaltungsbereich</h2>
+      <p>
+        Vereinsmitglieder, die die Termine pflegen, melden sich in einem geschützten Bereich an.
+        Die dabei verarbeiteten Daten betreffen nur sie; sie werden in den{" "}
+        <Link href="/admin/datenschutz">Datenschutzhinweisen für den Verwaltungsbereich</Link>{" "}
+        erläutert.
       </p>
 
       <h2>Ihre Rechte</h2>

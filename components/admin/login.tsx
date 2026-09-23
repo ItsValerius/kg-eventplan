@@ -127,6 +127,12 @@ export function Login() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+        <Link
+          href="/admin/datenschutz"
+          className="mt-5 block w-fit text-xs text-muted-foreground hover:underline"
+        >
+          Datenschutzhinweise für den Verwaltungsbereich
+        </Link>
       </form>
     </div>
   );
