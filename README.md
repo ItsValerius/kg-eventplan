@@ -1,6 +1,6 @@
 # Knallköpp Sessionsplan 2026/2027
 
-German public event calendar at `/` and password-protected event administration at `/admin`. Includes month filters, event details and individual iCalendar downloads. Administrators can add, edit, publish and delete dates; drafts never appear publicly.
+German public event calendar at `/` and password-protected event administration at `/admin`. Includes month filters, event details, a downloadable PDF of the season plan and a light/dark theme. Administrators can add, edit, duplicate, publish and delete dates; drafts never appear publicly.
 
 ## Development
 
@@ -26,7 +26,11 @@ pnpm admin:create you@example.com "Your Name"
 
 The command prints a generated password once. Running it again for the same address sets a new password and ends that admin's sessions; `pnpm admin:remove you@example.com` deletes the account. There is no public sign-up.
 
-After that, admins manage access themselves under **Zugänge** on `/admin`: an invitation creates the account and emails a link (valid 24 hours) with which the person sets their own password; the login page offers **Passwort vergessen?** with the same kind of link. Email goes out through the club's IONOS mailbox (`SMTP_USER`, `SMTP_PASSWORD`). Locally, `pnpm mail:up` starts a Mailpit container that catches every email instead of sending it; `.env.example` points `SMTP_HOST`/`SMTP_PORT` at it, and the inbox is at http://localhost:8025. `pnpm admin:create` stays available for when no admin can sign in.
+After that, admins manage access themselves under **Zugänge** on `/admin`: an invitation creates the account and emails a link (valid 24 hours) with which the person sets their own password; the login page offers **Passwort vergessen?** with the same kind of link. Email goes out through the club's IONOS mailbox (`SMTP_USER`, `SMTP_PASSWORD`). Locally, `pnpm mail:up` starts a Mailpit container that catches every email instead of sending it; `.env.example` points `SMTP_HOST`/`SMTP_PORT` at it, and the inbox is at http://localhost:8025. `pnpm admin:create` stays available for when no admin can sign in. After too many failed sign-ins, clear the local rate limit with:
+
+```sh
+docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "delete from rate_limits;"'
+```
 
 ## Database and existing dates
 
@@ -103,3 +107,5 @@ Display font: Barlow Condensed Bold, self-hosted from Google Fonts; SIL Open Fon
 ## UI development
 
 Styling uses Tailwind CSS v4 with semantic theme tokens in `app/globals.css`. Shared controls are local shadcn/ui components in `components/ui`, configured with Base UI (`base-nova`) in `components.json`. No Radix UI components are used. Add components with `pnpm dlx shadcn@latest add <component>` and preserve the club theme. See `DESIGN.md` for variants and responsive conventions.
+
+Dark mode uses `next-themes` with the `dark` class on `<html>`: it follows the system setting until a visitor uses the footer toggle, which is remembered per browser. Dark token values live under `.dark` in `app/globals.css` and apply on screen only, so printouts stay light. Use theme tokens rather than fixed colors so both themes keep working.
