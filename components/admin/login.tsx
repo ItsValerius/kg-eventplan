@@ -50,7 +50,7 @@ export function Login() {
   }
   return (
     <div className="grid grid-cols-[1.15fr_1fr] items-center gap-22.5 pt-10 pb-17.5 max-lg:gap-8.75 max-md:grid-cols-1 max-md:gap-7.5 max-md:py-0">
-      <div className="[&_h1]:text-[62px] max-lg:[&_h1]:text-[50px] max-md:[&_h1]:text-[49px] [&_h1_span]:text-primary [&_p]:my-6 [&_p]:max-w-[40ch] [&_p]:leading-[1.8] max-md:[&_p]:my-4.5 max-md:[&_p]:text-[13px]">
+      <div className="[&_h1]:text-[62px] max-lg:[&_h1]:text-[49px] [&_h1_span]:text-primary [&_p]:my-6 [&_p]:max-w-[40ch] [&_p]:leading-[1.8] max-md:[&_p]:my-4.5 max-md:[&_p]:text-[13px]">
         <h1>
           Hinter den Kulissen.
           <br />

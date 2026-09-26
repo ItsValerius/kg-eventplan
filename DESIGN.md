@@ -49,6 +49,42 @@ typography:
     fontSize: "13px"
     fontWeight: 600
     lineHeight: 1.2
+  panel-title:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "32px"
+    fontWeight: 700
+    lineHeight: 1.03
+    letterSpacing: "-0.02em"
+  date-compact:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "35px"
+    fontWeight: 700
+    lineHeight: 1
+  login-display:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "62px"
+    fontWeight: 700
+    lineHeight: 1.03
+  login-display-compact:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "49px"
+    fontWeight: 700
+    lineHeight: 1.03
+  wordmark:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "27px"
+    fontWeight: 700
+    lineHeight: 1.1
+  wordmark-compact:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "23px"
+    fontWeight: 700
+    lineHeight: 1.1
+  micro:
+    fontFamily: "Arial, Helvetica, sans-serif"
+    fontSize: "11px"
+    fontWeight: 600
+    lineHeight: 1.2
 rounded:
   tag: "3px"
   field: "5px"
@@ -144,6 +180,10 @@ Club green carries recognition and action; cool white and green-tinted neutrals 
 - **Ink / Muted:** primary text and supporting metadata.
 - **Wash / Line:** quiet form panels, hover surfaces and thin row dividers. Fields, checkboxes and the scrollbar use the stronger field-border tone, which keeps input outlines at 3:1 or more against white and wash (WCAG 1.4.11).
 
+### Dark theme
+
+Dark mode follows the system until a visitor uses the footer toggle (remembered per browser); it applies on screen only, so printouts stay light. Green-tinted near-black (`#0f1712`) replaces white, and club green lightens to `#56b04a` so it reads on dark while staying green rather than lime; danger deepens to `#b8452f` so white labels keep 5:1. Dialog scrims use the `--scrim` token in both themes.
+
 **The Green Action Rule.** Use club green for primary actions and active navigation; pale green identifies selected or successful states.
 
 ## Typography
@@ -155,7 +195,7 @@ The display face supplies dense, cheerful weight while the body face makes label
 
 ### Hierarchy
 
-- **Display:** primary public heading uses the frontmatter clamp. Login headings use 62px and admin headings 58px on desktop; mobile uses 49px and 42px respectively.
+- **Display:** primary public heading uses the frontmatter clamp. Login headings use login-display (62px) and login-display-compact (49px) below 1000px; the admin page headline uses headline (44px), dropping to panel-title (32px) below 700px. The header wordmark uses wordmark (27px) and wordmark-compact (23px).
 - **Headline:** section headings use the frontmatter headline role; public schedule headings become 38px on mobile. Form headings use 35px, reducing to 29px on mobile.
 - **Date:** public day numerals use the date role, reducing to 39px on mobile; administration dates use 35px. The public hero states the complete season title in the display face.
 - **Title:** public event titles use the title role, reducing to 18px on mobile. Admin titles use 16px, reducing to 15px.
@@ -170,13 +210,13 @@ The shared shell is centered with a 1280px maximum width and 48px side padding. 
 
 The public desktop agenda uses a 300px session-month rail, a flexible event column and a 48px gap; the intermediate layout uses 270px and 32px. From 700px up the rail is sticky. At 700px the month overview moves above the agenda, and the month view shows only the caption and arrows so the events follow directly. Public date, title and disclosure remain aligned while time and venue stack. Desktop event rows use 22px vertical padding; mobile uses 20px.
 
-Administration reuses the shell and date-led rows. Rows are grouped under the same month headings as the public agenda. The desktop list allocates flexible event information plus 190px status and 160px actions (edit, duplicate, delete); intermediate widths use 120px and 152px. Mobile places the event information full width, then the status on the left and the three actions on the right. Icon actions are 44px squares. Duplicating opens a new-event form with everything but the date and publication copied, focused on the date. The status column is a switch labelled “Veröffentlicht” or “Entwurf”, so publishing and withdrawing need no form. Deleting asks first in an alert dialog (“Behalten” focused, “Ja, löschen” in danger fill). Feedback appears as shadcn toasts (Base UI) at the bottom right, so the list never shifts; errors stay until dismissed. Adding, editing and duplicating open the form in a dialog; closing it returns focus to the button that opened it. Forms use two columns with a 20px gap: title, venue and description span both columns while date and time stay paired. Native date/time appearance follows browser locale.
+Administration lists events in a shadcn data table (TanStack Table) under the same month headings as the public agenda; the headings are full-width rows inserted wherever the month changes, so they follow whatever is filtered. Above it, a search field (club, title and venue; umlauts match their ae/oe/ue spellings) sits beside status and month selects and a “Vergangene ausblenden” checkbox. Filters live in the query string (suche, status, monat, kommend) via history.replaceState, so reloads and shared links keep the view without a server round trip. Desktop columns are date (compact 35px numerals), event (capped at 34rem from 1000px so the status switch sits near the titles), status and 160px actions (edit, duplicate, delete); below 700px the status switch moves under the event text, beside a single “⋯” menu (Bearbeiten, Duplizieren, Löschen) that replaces the three icon buttons. Icon actions are 44px ghost squares with native tooltips: edit, duplicate and delete stay muted until their row is hovered or focused; then edit and duplicate turn green and delete turns danger red (the Zugänge rows follow the same rule). Past events mute their numerals and titles, like the public month view, so the list shows where the season stands. Duplicating opens a new-event form with everything but the date and publication copied, focused on the date. The status column is a switch, so publishing and withdrawing need no form; switch and its text form one 44px-tall tap target, and only the toggled row waits for the server. The form uses the same switch. The count line above the table reports the drafts still to publish and doubles as a toggle for the drafts filter (semibold and underlined at rest, a pale-green tag while active); a filtered view states “N von M Terminen”. Every per-event label, confirmation and toast names the event with its short date (“KG Knallköpp – Biwak, So., 24. Jan.”), so duplicates stay distinguishable. Below 700px the search stays visible and status, month and “Vergangene ausblenden” fold behind a “Filter” button that shows how many are active. A skip link after the toolbar jumps keyboard users past the list to Zugänge. Admin headings use the display face at headline (44px) for the page and panel-title (32px) for dialogs, sections and the empty state. Deleting asks first in an alert dialog (“Behalten” focused, “Ja, löschen” in danger fill). Feedback appears as shadcn toasts (Base UI), bottom left on desktop so they never cover the status and action columns, full width at the bottom on phones; the list never shifts. Success toasts close after 3s and name the event with its date, saves included; errors stay until dismissed. After a save the row scrolls into view and carries a brief pale-green tint. Adding, editing and duplicating open the form in a dialog; closing it returns focus to the button that opened it. The close button and “Abbrechen” close at once; Escape or a backdrop click on an edited form first asks “Änderungen verwerfen?” (“Weiter bearbeiten” focused, “Verwerfen” in danger fill); a nested confirm dims the dialog beneath it with the scrim token instead of stacking a second page scrim. While a publish is saving, a small spinner replaces the row's status text. Below 700px the page headline drops to the panel-title size. The Zugänge section below the events follows the same patterns: “Jemanden einladen” opens the invite form in a dialog with inline field errors, removing access asks in an alert dialog (“Behalten” focused), and both sections share one toast stack. Event forms use two columns with a 20px gap: title, venue and description span both columns while date and time stay paired. Native date/time appearance follows browser locale.
 
 ## Elevation & Depth
 
 Depth comes entirely from white, wash and pale surfaces with fine borders. There are no box shadows. Login and edit panels have more generous rounding than the open event rows; this marks an editing context without suggesting floating layers.
 
-**The Flat Surface Rule.** Separate content with whitespace, fine borders and tonal fills; the shipped system has no box shadows.
+**The Flat Surface Rule.** Separate content with whitespace, fine borders and tonal fills; the shipped system has no box shadows. Overlays follow it too: dialogs, the row menu and toasts are popover-filled with a 1px line border (panel rounding for dialogs, field rounding for toasts) over a flat, unblurred ink scrim, and dialog buttons sit directly in the panel without a tinted footer bar. On phones the alert dialog stacks “Behalten” above the danger action.
 
 ## Shapes
 
@@ -190,7 +230,7 @@ Confident, compact controls. Primary and outline variants share a 45px minimum h
 
 ### Inputs / Fields
 
-White fields have a fine field-border stroke, field rounding and 12px padding; edit inputs have a 46px minimum height. Validation is German and inline: each invalid field gets the error border and its message directly below, and focus moves to the first one. Keyboard focus is a 3px green outline offset by 4px on every control; the resting outline colour is also green, so colour transitions never flash ink. Error feedback uses the error pair; success uses pale green and deep green. Native selectors and date/time controls retain their platform behavior.
+White fields have a fine field-border stroke, field rounding and 12px padding; edit inputs have a 46px minimum height. Validation is German and inline: each invalid field gets the error border and its message directly below, and focus moves to the first one. Keyboard focus is a 3px green outline offset by 4px on every control, including switches, checkboxes, native selects and toasts (one global rule in globals.css; components must not add their own rings or `outline-none`), and it turns red on a field marked invalid; the resting outline colour is also green, so colour transitions never flash ink. Error feedback uses the error pair; success uses pale green and deep green. Native selectors and date/time controls retain their platform behavior.
 
 ### Navigation
 
@@ -202,7 +242,7 @@ Placeholders mirror the real layout (month tiles, date-led rows, admin actions) 
 
 ### Chips
 
-Admin publication badges use pale green for published dates and the neutral wash for drafts, with compact padding and tag rounding. They are labels, not filter buttons.
+Published rows stay quiet: muted “Veröffentlicht” text beside the switch. Drafts, the work still to do, carry a wash “Entwurf” tag with a field-border outline, micro type and tag rounding. They are labels, not filter buttons.
 
 ### Cards / Containers
 

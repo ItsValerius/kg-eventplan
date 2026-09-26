@@ -5,6 +5,7 @@ import { Header, Footer, Main } from "@/components/shell";
 import AdminPanel from "@/components/admin/panel";
 import { AdminFallback } from "@/components/admin/admin-fallback";
 import { Accounts } from "@/components/admin/accounts";
+import { Toaster } from "@/components/ui/toast";
 import { Login } from "@/components/admin/login";
 import { listAdmins } from "@/lib/server/accounts";
 import { currentAdmin } from "@/lib/server/auth";
@@ -44,6 +45,8 @@ async function AdminEvents({ selfId }: { selfId: string }) {
     <>
       <AdminPanel initialEvents={events} />
       <Accounts initialAccounts={accounts} selfId={selfId} />
+      {/* One toast stack for both sections. */}
+      <Toaster />
     </>
   );
 }

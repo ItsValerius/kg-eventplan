@@ -1,8 +1,16 @@
 import { Check } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
   Field,
   FieldContent,
@@ -13,7 +21,8 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { eventLabel } from "@/lib/format";
 import { season } from "@/lib/season";
 import type { Draft, FieldName } from "./draft";
 
@@ -64,6 +73,10 @@ export function EventForm({
   onSubmit: (event: FormEvent) => void;
   onClose: () => void;
 }) {
+  // What the form opened with, to tell a stray dismissal from abandoning real edits.
+  const [initial] = useState(draft);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  const edited = JSON.stringify(draft) !== JSON.stringify(initial);
   function fieldProps(field: FieldName) {
     return {
       id: `field-${field}`,
@@ -72,16 +85,36 @@ export function EventForm({
     };
   }
   return (
-    // Escape, the close button and a backdrop click all close it, except while saving.
-    <Dialog open onOpenChange={(open) => !open && !busy && onClose()}>
+    // Nothing closes it while saving. The close button closes right away, like "Abbrechen";
+    // Escape or a backdrop click only ask first once something was changed.
+    <Dialog
+      open
+      onOpenChange={(open, { reason }) => {
+        if (open || busy) return;
+        if (edited && reason !== "close-press") setConfirmingDiscard(true);
+        else onClose();
+      }}
+    >
       <DialogContent
-        initialFocus={() => document.getElementById(`field-${focusField}`)}
+        // On touch screens focusing a text field pops the keyboard over the form, so start on
+        // the panel itself there; the date of a copy opens no keyboard and stays focused.
+        initialFocus={() =>
+          focusField !== "date" && matchMedia("(pointer: coarse)").matches
+            ? document.querySelector<HTMLElement>("[data-slot=dialog-content]")
+            : document.getElementById(`field-${focusField}`)
+        }
         className="max-h-[calc(100dvh-2rem)] gap-0 overflow-y-auto bg-background p-7.5 max-md:px-4 max-md:py-5 sm:max-w-2xl"
       >
         <form id="event-form" noValidate onSubmit={onSubmit}>
-          <DialogTitle className="pr-12 font-display text-[35px] leading-[1.03] font-bold tracking-[-.02em] max-md:text-[29px]">
+          <DialogTitle className="pr-12 font-display text-[32px] leading-[1.03] font-bold tracking-[-.02em]">
             {draft.id ? "Termin bearbeiten" : "Ein neuer Grund zum Feiern."}
           </DialogTitle>
+          {/* The list is hidden behind the scrim, so name the event being edited. */}
+          {draft.id && (
+            <DialogDescription className="mt-2 text-[13px]">
+              {eventLabel(initial)}
+            </DialogDescription>
+          )}
           <FieldGroup className="mt-6.25 grid grid-cols-2 gap-5 max-md:gap-x-3 max-md:gap-y-4">
             <EventField
               name="host"
@@ -163,8 +196,9 @@ export function EventForm({
               />
             </EventField>
             <Field orientation="horizontal" className="col-span-full gap-2.5">
-              <Checkbox
+              <Switch
                 id="field-published"
+                className="mt-0.5"
                 checked={draft.published}
                 onCheckedChange={(checked) => onUpdate("published", checked)}
               />
@@ -194,6 +228,21 @@ export function EventForm({
             </Button>
           </div>
         </form>
+        <AlertDialog open={confirmingDiscard} onOpenChange={setConfirmingDiscard}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="font-display text-[32px] leading-[1.03] font-bold tracking-[-.02em]">
+                Änderungen verwerfen?
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Weiter bearbeiten</AlertDialogCancel>
+              <Button variant="destructive" onClick={onClose}>
+                Verwerfen
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
