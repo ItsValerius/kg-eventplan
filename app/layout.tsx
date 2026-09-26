@@ -4,6 +4,7 @@ import { LucideProvider } from "lucide-react";
 import "./globals.css";
 import { season } from "@/lib/season";
 import { siteUrl } from "@/lib/seo/structured-data";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const display = localFont({
   src: "../public/fonts/barlow-condensed-bold.woff2",
@@ -34,16 +35,24 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={display.variable}>
+    // next-themes sets the dark class before hydration.
+    <html lang="de" className={display.variable} suppressHydrationWarning>
       <body>
         <a
-          className="sr-only fixed top-2 left-4 z-50 bg-primary p-3 text-white focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-4 focus-visible:p-3"
+          className="sr-only fixed top-2 left-4 z-50 bg-primary p-3 text-primary-foreground focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-4 focus-visible:p-3"
           href="#main-content"
         >
           Zum Inhalt
         </a>
-        {/* Lucide's default stroke is heavier than the club's line icons. */}
-        <LucideProvider strokeWidth={1.7}>{children}</LucideProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {/* Lucide's default stroke is heavier than the club's line icons. */}
+          <LucideProvider strokeWidth={1.7}>{children}</LucideProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

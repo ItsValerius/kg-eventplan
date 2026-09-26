@@ -4,6 +4,8 @@
 @source "./";
 @source "../components";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #17251c;
@@ -28,6 +30,39 @@
   --input: #7f8e7c;
   --ring: #439537;
   --radius: 0.375rem;
+  --shimmer-base: #eef2ea;
+  --shimmer-highlight: #f7f9f4;
+}
+
+/* Screen only: printouts stay light. */
+@media screen {
+  .dark {
+    color-scheme: dark;
+    --background: #0f1712;
+    --foreground: #e3ebe1;
+    --card: #141e17;
+    --card-foreground: #e3ebe1;
+    --popover: #141e17;
+    --popover-foreground: #e3ebe1;
+    --primary: #6cc95f;
+    --primary-foreground: #0c1a0f;
+    --primary-dark: #a8e59a;
+    --secondary: #1d3320;
+    --secondary-foreground: #a8e59a;
+    --muted: #172119;
+    --muted-foreground: #9aa89c;
+    --accent: #1d3320;
+    --accent-foreground: #a8e59a;
+    --destructive: #f08a76;
+    --destructive-surface: #3a1a14;
+    --danger: #c9503b;
+    --surface-open: #131d16;
+    --border: #283629;
+    --input: #5d6e60;
+    --ring: #6cc95f;
+    --shimmer-base: #1a251d;
+    --shimmer-highlight: #223026;
+  }
 }
 
 @theme inline {

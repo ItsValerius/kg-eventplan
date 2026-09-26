@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // Centered page width with responsive gutters, shared by header, content and footer.
 const pageWidth =
@@ -70,6 +71,7 @@ export function Footer() {
       <div className="flex gap-5 max-md:gap-3.75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a:hover]:underline">
         <Link href="/impressum">Impressum</Link>
         <Link href="/datenschutz">Datenschutz</Link>
+        <ThemeToggle />
       </div>
     </footer>
   );
