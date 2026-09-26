@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 // Centered page width with responsive gutters, shared by header, content and footer.

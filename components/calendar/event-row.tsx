@@ -2,7 +2,7 @@ import { Clock, MapPin } from "lucide-react";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { ClubEvent } from "@/lib/events";
 import { eventName, formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 // One unfoldable event: date, title and meta in the trigger, the description below.
 export function EventRow({

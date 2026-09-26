@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 // Month name, year and a rule running to the edge, above each month's events.
 export function MonthHeading({ month, className }: { month: string; className?: string }) {
