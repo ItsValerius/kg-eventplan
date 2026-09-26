@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "cn";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Separator } from "@/components/ui/separator";
 
 // Centered page width with responsive gutters, shared by header, content and footer.
 const pageWidth =
@@ -40,7 +41,7 @@ export function Header() {
         )}
       >
         <Link
-          className="flex items-center gap-3 max-md:gap-2 max-md:[&>img]:size-10.75 [&>span]:font-display [&>span]:text-[27px] [&>span]:leading-[1.1] [&>span]:tracking-wide max-md:[&>span]:text-[23px] [&>span>span]:mt-1.5 [&>span>span]:block [&>span>span]:font-sans [&>span>span]:text-[11px] [&>span>span]:font-semibold [&>span>span]:tracking-[.12em] max-md:[&>span>span]:mt-1.25 max-md:[&>span>span]:text-[11px]"
+          className="flex min-h-11 items-center gap-3 max-md:gap-2 max-md:[&>img]:size-10.75 [&>span]:font-display [&>span]:text-[27px] [&>span]:leading-[1.1] [&>span]:tracking-wide max-md:[&>span]:text-[23px] [&>span>span]:mt-1.5 [&>span>span]:block [&>span>span]:font-sans [&>span>span]:text-[11px] [&>span>span]:font-semibold [&>span>span]:tracking-[.12em] max-md:[&>span>span]:mt-1.25 max-md:[&>span>span]:text-[11px]"
           href="/"
           aria-label="Knallköpp Golkrath – zum Sessionsplan"
         >
@@ -58,21 +59,31 @@ export function Footer() {
     <footer
       className={cn(
         pageWidth,
-        "flex items-center justify-between gap-6 border-t border-border pt-6.75 pb-8 text-xs max-md:flex-wrap max-md:items-start max-md:gap-5 max-md:py-6 print:hidden [&>div>span]:text-muted-foreground [&>p]:text-xs [&>p]:italic max-md:[&>p]:hidden",
+        "flex items-center justify-between gap-6 border-t border-border pt-6.75 pb-8 text-xs max-md:flex-wrap max-md:justify-center max-md:gap-x-5 max-md:gap-y-3 max-md:py-6 max-md:text-center print:hidden [&>div>span]:text-muted-foreground [&>p]:flex-1 [&>p]:text-center [&>p]:text-xs [&>p]:italic max-md:[&>p]:hidden",
       )}
     >
-      <div>
-        <Link href="/" className="block py-1 font-semibold">
+      {/* Phones: links and toggle on top, the club centered below. */}
+      <div className="max-md:order-4 max-md:basis-full">
+        <Link
+          href="/"
+          className="relative block py-1 font-semibold after:absolute after:inset-x-0 after:-inset-y-2.5"
+        >
           KG Knallköpp Golkrath e.V.
         </Link>
         <span>Karneval zum Anfassen. Seit 1929.</span>
       </div>
       <p>Jolkere Knall Mött!</p>
-      <div className="flex gap-5 max-md:gap-3.75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a:hover]:underline">
+      <div className="flex gap-5 max-md:order-1 max-md:gap-3.75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a:hover]:underline">
         <Link href="/impressum">Impressum</Link>
         <Link href="/datenschutz">Datenschutz</Link>
-        <ThemeToggle />
       </div>
+      <Separator
+        orientation="vertical"
+        aria-hidden
+        className="max-md:order-2 data-vertical:h-4 data-vertical:self-center"
+      />
+      {/* Pulled in so the icon, not the button's edge, sits one gap from the rule. */}
+      <ThemeToggle className="-ml-3 max-md:order-3" />
     </footer>
   );
 }
