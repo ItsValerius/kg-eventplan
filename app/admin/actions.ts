@@ -2,13 +2,23 @@
 
 import { updateTag } from "next/cache";
 import { isAdmin } from "@/lib/server/auth";
+import { z } from "zod";
 import { eventIdSchema, eventSchema, validationMessage } from "@/lib/events";
 import { EVENTS_CACHE_TAG } from "@/lib/server/public-events";
-import { createEvent, deleteEvent, readEvents, updateEvent } from "@/lib/server/store";
+import {
+  createEvent,
+  deleteEvent,
+  readEvents,
+  setPublished,
+  updateEvent,
+} from "@/lib/server/store";
 import { regenerateSeasonPlanPdf } from "@/lib/pdf/season-pdf";
 
 // New events arrive without an id; edits carry the id of the stored event.
 const savedEventSchema = eventSchema.extend({ id: eventIdSchema.shape.id.optional() });
+const publicationSchema = eventIdSchema.extend({
+  published: z.boolean({ error: "Bitte prüfe den Veröffentlichungsstatus." }),
+});
 const signedOut = { ok: false as const, error: "Bitte melde dich erneut an." };
 const missingEvent = {
   ok: false as const,
@@ -64,6 +74,24 @@ export async function deleteEventAction(input: unknown) {
     return {
       ok: false as const,
       error: "Löschen fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
+    };
+  }
+}
+
+// Publishes or withdraws one event without touching its other fields.
+export async function setPublishedAction(input: unknown) {
+  if (!(await isAdmin())) return signedOut;
+  const parsed = publicationSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: validationMessage(parsed.error) };
+
+  try {
+    if (!(await setPublished(parsed.data.id, parsed.data.published))) return missingEvent;
+    return await publishChanges();
+  } catch (error) {
+    console.error("Event publication change failed:", error);
+    return {
+      ok: false as const,
+      error: "Status konnte nicht geändert werden. Bitte lade die Seite neu.",
     };
   }
 }

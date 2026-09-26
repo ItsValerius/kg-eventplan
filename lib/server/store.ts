@@ -53,3 +53,12 @@ export async function deleteEvent(id: string) {
     .returning({ id: events.id });
   return deleted.length === 1;
 }
+
+export async function setPublished(id: string, published: boolean) {
+  const updated = await database()
+    .update(events)
+    .set({ published })
+    .where(eq(events.id, id))
+    .returning({ id: events.id });
+  return updated.length === 1;
+}
