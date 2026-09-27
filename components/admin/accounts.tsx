@@ -1,6 +1,6 @@
 "use client";
 import { Mail, Trash2, UserPlus } from "lucide-react";
-import { useRef, useState, type FormEvent } from "react";
+import { useRef } from "react";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -13,24 +13,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "@/components/ui/toast";
-import {
-  inviteAdminAction,
-  removeAdminAction,
-  resendInvitationAction,
-} from "@/app/admin/account-actions";
-import { inviteSchema } from "@/lib/account";
+import { useAccounts } from "@/hooks/use-accounts";
+import { useConfirmRemoval } from "@/hooks/use-confirm-removal";
+import { useInviteForm } from "@/hooks/use-invite-form";
 import type { AdminAccount } from "@/lib/server/accounts";
+import { FormField } from "./form-field";
 
-type Result = Awaited<ReturnType<typeof inviteAdminAction>>;
-type InviteField = "name" | "email";
-
-// Same feedback as the event list: toasts, so the list never shifts. Errors stay until dismissed.
-const notify = (title: string) => toast.add({ title, type: "success", timeout: 3000 });
-const fail = (title: string) => toast.add({ title, type: "error", timeout: 0 });
 const displayTitle = "font-display text-[32px] leading-[1.03] font-bold tracking-[-.02em]";
 
 // Who can manage the Sessionsplan: invite people by email, resend or remove access.
@@ -41,79 +32,17 @@ export function Accounts({
   initialAccounts: AdminAccount[];
   selfId: string;
 }) {
-  const [accounts, setAccounts] = useState(initialAccounts);
-  const [inviting, setInviting] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<InviteField, string>>>({});
-  // Which action is running: "invite", or "resend:<id>" / "remove:<id>".
-  const [busy, setBusy] = useState<string | null>(null);
-  // The account whose removal confirmation is open.
-  const [removing, setRemoving] = useState<AdminAccount | null>(null);
+  const { accounts, busy, ...actions } = useAccounts(initialAccounts);
+  const invitation = useInviteForm(actions.invite);
+  const { form } = invitation;
+  // The account whose removal confirmation is open. After a removal its row is gone, so
+  // focus lands on "Jemanden einladen".
   const inviteButton = useRef<HTMLButtonElement>(null);
-  const justRemoved = useRef(false);
-
-  async function run(action: string, request: () => Promise<Result>, success: string) {
-    setBusy(action);
-    try {
-      const result = await request();
-      if (!result.ok) return fail(result.error);
-      setAccounts(result.accounts);
-      notify(success);
-      return true;
-    } catch {
-      fail("Das hat nicht geklappt. Bitte versuche es erneut.");
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  function openInvite() {
-    setName("");
-    setEmail("");
-    setFieldErrors({});
-    setInviting(true);
-  }
-
-  async function invite(event: FormEvent) {
-    event.preventDefault();
-    const parsed = inviteSchema.safeParse({ name, email });
-    if (!parsed.success) {
-      // Each problem under its field, focus on the first, like the event form.
-      const errors: Partial<Record<InviteField, string>> = {};
-      for (const issue of parsed.error.issues)
-        errors[issue.path[0] as InviteField] ??= issue.message;
-      setFieldErrors(errors);
-      document.getElementById(errors.name ? "invite-name" : "invite-email")?.focus();
-      return;
-    }
-    setFieldErrors({});
-    const sent = await run(
-      "invite",
-      () => inviteAdminAction(parsed.data),
-      `Einladung an ${parsed.data.email} verschickt.`,
-    );
-    if (sent) setInviting(false);
-  }
+  const confirm = useConfirmRemoval<AdminAccount>();
 
   async function remove(account: AdminAccount) {
-    const removed = await run(
-      `remove:${account.id}`,
-      () => removeAdminAction({ id: account.id }),
-      `Zugang von ${account.name} entfernt.`,
-    );
-    if (removed) {
-      justRemoved.current = true;
-      setRemoving(null);
-    }
-  }
-
-  function fieldProps(field: InviteField) {
-    return {
-      id: `invite-${field}`,
-      "aria-invalid": fieldErrors[field] ? true : undefined,
-      "aria-describedby": fieldErrors[field] ? `invite-${field}-error` : undefined,
-    };
+    if (!(await actions.remove(account))) return;
+    confirm.done();
   }
 
   return (
@@ -137,7 +66,7 @@ export function Accounts({
           size="default"
           aria-haspopup="dialog"
           disabled={busy !== null}
-          onClick={openInvite}
+          onClick={invitation.open}
         >
           <UserPlus size={18} />
           Jemanden einladen
@@ -173,13 +102,7 @@ export function Accounts({
                     size="default"
                     disabled={busy !== null}
                     aria-busy={busy === `resend:${account.id}`}
-                    onClick={() =>
-                      run(
-                        `resend:${account.id}`,
-                        () => resendInvitationAction({ id: account.id }),
-                        `Einladung erneut an ${account.email} verschickt.`,
-                      )
-                    }
+                    onClick={() => actions.resend(account)}
                   >
                     {busy === `resend:${account.id}` ? <Spinner aria-hidden /> : <Mail size={16} />}
                     Erneut senden
@@ -192,7 +115,7 @@ export function Accounts({
                     className="text-muted-foreground group-hover/row:text-destructive hover:bg-destructive-surface hover:text-destructive focus-visible:text-destructive"
                     disabled={busy !== null}
                     aria-label={`Zugang von ${account.name} entfernen`}
-                    onClick={() => setRemoving(account)}
+                    onClick={() => confirm.ask(account)}
                   >
                     <Trash2 size={18} />
                   </Button>
@@ -204,52 +127,52 @@ export function Accounts({
       </ul>
 
       <Dialog
-        open={inviting}
-        onOpenChange={(open) => !open && busy !== "invite" && setInviting(false)}
+        open={invitation.isOpen}
+        onOpenChange={(open) => !open && busy !== "invite" && invitation.close()}
       >
         <DialogContent
           initialFocus={() => document.getElementById("invite-name")}
           className="gap-0 bg-background p-7.5 max-md:px-4 max-md:py-5 sm:max-w-lg"
         >
-          <form noValidate onSubmit={invite}>
+          <form
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
             <DialogTitle className={`pr-12 ${displayTitle}`}>Jemanden einladen</DialogTitle>
             <FieldGroup className="mt-6.25 gap-5">
-              <Field data-invalid={fieldErrors.name ? true : undefined}>
-                <FieldLabel htmlFor="invite-name" className="text-xs font-semibold">
-                  Name
-                </FieldLabel>
-                <Input
-                  {...fieldProps("name")}
-                  maxLength={80}
-                  autoComplete="off"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    setFieldErrors((errors) => ({ ...errors, name: undefined }));
-                  }}
-                />
-                <FieldError id="invite-name-error" className="text-xs">
-                  {fieldErrors.name}
-                </FieldError>
-              </Field>
-              <Field data-invalid={fieldErrors.email ? true : undefined}>
-                <FieldLabel htmlFor="invite-email" className="text-xs font-semibold">
-                  E-Mail-Adresse
-                </FieldLabel>
-                <Input
-                  {...fieldProps("email")}
-                  type="email"
-                  autoComplete="off"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setFieldErrors((errors) => ({ ...errors, email: undefined }));
-                  }}
-                />
-                <FieldError id="invite-email-error" className="text-xs">
-                  {fieldErrors.email}
-                </FieldError>
-              </Field>
+              <form.Field name="name">
+                {(field) => (
+                  <FormField field={field} id="invite-name" label="Name">
+                    {(control) => (
+                      <Input
+                        {...control}
+                        maxLength={80}
+                        autoComplete="off"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                    )}
+                  </FormField>
+                )}
+              </form.Field>
+              <form.Field name="email">
+                {(field) => (
+                  <FormField field={field} id="invite-email" label="E-Mail-Adresse">
+                    {(control) => (
+                      <Input
+                        {...control}
+                        type="email"
+                        autoComplete="off"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                    )}
+                  </FormField>
+                )}
+              </form.Field>
             </FieldGroup>
             <div className="mt-6.5 flex flex-wrap gap-3">
               <Button
@@ -271,7 +194,7 @@ export function Accounts({
                 size="default"
                 type="button"
                 disabled={busy === "invite"}
-                onClick={() => setInviting(false)}
+                onClick={invitation.close}
               >
                 Abbrechen
               </Button>
@@ -281,21 +204,14 @@ export function Accounts({
       </Dialog>
 
       <AlertDialog
-        open={removing !== null}
-        onOpenChange={(open) => !open && busy === null && setRemoving(null)}
+        open={confirm.target !== null}
+        onOpenChange={(open) => !open && busy === null && confirm.cancel()}
       >
-        {/* After a removal its row is gone, so focus lands on "Jemanden einladen". */}
-        <AlertDialogContent
-          finalFocus={() => {
-            const removed = justRemoved.current;
-            justRemoved.current = false;
-            return removed ? inviteButton.current : true;
-          }}
-        >
+        <AlertDialogContent finalFocus={confirm.removed ? inviteButton : true}>
           <AlertDialogHeader>
             <AlertDialogTitle className={displayTitle}>Zugang entfernen?</AlertDialogTitle>
             <AlertDialogDescription className="text-[13px]">
-              {removing?.name} wird sofort abgemeldet.
+              {confirm.target?.name} wird sofort abgemeldet.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -304,7 +220,7 @@ export function Accounts({
               variant="destructive"
               disabled={busy !== null}
               aria-busy={busy !== null}
-              onClick={() => removing && remove(removing)}
+              onClick={() => confirm.target && remove(confirm.target)}
             >
               {busy !== null && <Spinner aria-hidden />}
               {busy !== null ? "Wird entfernt …" : "Ja, entfernen"}

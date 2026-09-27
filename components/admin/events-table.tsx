@@ -1,15 +1,6 @@
 "use client";
-import {
-  columnFilteringFeature,
-  createFilteredRowModel,
-  tableFeatures,
-  useTable,
-  type ColumnDef,
-  type ColumnFiltersState,
-  type FilterFn,
-} from "@tanstack/react-table";
 import { Copy, Ellipsis, Pencil, Search, SlidersHorizontal, Trash2 } from "lucide-react";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,9 +23,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { ClubEvent } from "@/lib/events";
-import { eventLabel, eventName, formatDate, todayInBerlin } from "@/lib/format";
+import { eventLabel, eventName, formatDate } from "@/lib/format";
 import { MonthHeading } from "../month-heading";
-import { useFilterParams } from "./filter-params";
+import { useEventsTable } from "@/hooks/use-events-table";
 
 type Handlers = {
   busy: boolean;
@@ -44,31 +35,6 @@ type Handlers = {
   onDuplicate: (event: ClubEvent) => void;
   onDelete: (event: ClubEvent) => void;
 };
-type DateFilter = { month: string; upcoming: boolean; today: string };
-
-const features = tableFeatures({
-  columnFilteringFeature,
-  filteredRowModel: createFilteredRowModel(),
-});
-type Filter = FilterFn<typeof features, ClubEvent>;
-
-// "Köpp", "Koepp" and "köpp" all match each other.
-function fold(text: string) {
-  return text
-    .toLocaleLowerCase("de")
-    .replace(/ä/g, "ae")
-    .replace(/ö/g, "oe")
-    .replace(/ü/g, "ue")
-    .replace(/ß/g, "ss");
-}
-const matchesSearch: Filter = (row, _column, query: string) =>
-  fold([row.original.host, row.original.title, row.original.location].join(" ")).includes(
-    fold(query.trim()),
-  );
-const matchesDate: Filter = (row, _column, { month, upcoming, today }: DateFilter) =>
-  (!month || row.original.date.startsWith(month)) && (!upcoming || row.original.date >= today);
-const matchesStatus: Filter = (row, _column, status: string) =>
-  row.original.published === (status === "veroeffentlicht");
 
 // Switch and text form one 44px-tall tap target. Published is the quiet norm; drafts,
 // the work still to do, carry the tag.
@@ -181,50 +147,14 @@ function ActionsMenu({
   );
 }
 
-// Columns 3 and 4 fold into the event cell below md, so phones get two columns.
-const columns: ColumnDef<typeof features, ClubEvent>[] = [
-  { id: "date", accessorKey: "date", header: "Datum", filterFn: matchesDate },
-  { id: "event", accessorFn: eventName, header: "Termin", filterFn: matchesSearch },
-  { id: "published", accessorKey: "published", header: "Status", filterFn: matchesStatus },
-  { id: "actions", header: () => <span className="sr-only">Aktionen</span> },
-];
-
 // Admin event list: search and filters over a table, split into months like the public plan.
 export function EventsTable({
   events,
   highlighted,
   ...handlers
 }: { events: ClubEvent[]; highlighted: string | null } & Handlers) {
-  const filters = useFilterParams();
-  const months = useMemo(() => [...new Set(events.map((e) => e.date.slice(0, 7)))], [events]);
-  const columnFilters: ColumnFiltersState = [
-    { id: "event", value: filters.query },
-    {
-      id: "date",
-      value: { month: filters.month, upcoming: filters.upcoming, today: todayInBerlin() },
-    },
-    ...(filters.status ? [{ id: "published", value: filters.status }] : []),
-  ].filter(({ value }) => value !== "");
-  const table = useTable({
-    features,
-    data: events,
-    columns,
-    state: { columnFilters },
-    getRowId: (event) => event.id,
-  });
-  const rows = table.getRowModel().rows;
-  // Past events are muted like in the public month view, so the list shows where "now" is.
-  const today = todayInBerlin();
-  const filtered = Boolean(filters.query || filters.status || filters.month || filters.upcoming);
-  const searchOnly =
-    Boolean(filters.query) && !filters.status && !filters.month && !filters.upcoming;
-  const countText = filtered ? `${rows.length} von ${events.length} Terminen` : "";
-  const [announced, setAnnounced] = useState("");
-  useEffect(() => {
-    const timer = setTimeout(() => setAnnounced(countText), 700);
-    return () => clearTimeout(timer);
-  }, [countText]);
-  const activeFilters = [filters.status, filters.month, filters.upcoming].filter(Boolean).length;
+  const { table, rows, filters, months, today, activeFilters, searchOnly, countText, announced } =
+    useEventsTable(events);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   return (
@@ -301,8 +231,7 @@ export function EventsTable({
           </label>
         </div>
       </search>
-      {/* With no match the empty row says so, so the visible count hides. Screen readers hear
-          the count once typing pauses, not on every keystroke. */}
+      {/* With no match the empty row says so, so the visible count hides. */}
       <p aria-hidden className={`text-xs not-empty:mt-3 ${rows.length ? "" : "hidden"}`}>
         {countText}
       </p>
@@ -357,6 +286,7 @@ export function EventsTable({
                     </TableCell>
                   </TableRow>
                 )}
+                {/* Past events are muted like in the public month view, so the list shows where "now" is. */}
                 <TableRow
                   data-row={event.id}
                   data-past={event.date < today ? "" : undefined}

@@ -1,4 +1,6 @@
+import { useSelector } from "@tanstack/react-form";
 import { Check } from "lucide-react";
+import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -15,75 +17,36 @@ import {
   Field,
   FieldContent,
   FieldDescription,
-  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, type FormEvent, type ReactNode } from "react";
+import type { EventFormApi } from "@/hooks/use-event-form";
 import { eventLabel } from "@/lib/format";
 import { season } from "@/lib/season";
 import type { Draft, FieldName } from "./draft";
+import { FormField } from "./form-field";
 
-// Label, control and inline error for one form field; the control gets fieldProps.
-function EventField({
-  name,
-  label,
-  optional = false,
-  error,
-  className,
-  children,
-}: {
-  name: FieldName;
-  label: string;
-  optional?: boolean;
-  error: string | undefined;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <Field data-invalid={error ? true : undefined} className={className}>
-      <FieldLabel htmlFor={`field-${name}`} className="gap-1 text-xs font-semibold">
-        {label}
-        {optional && <span className="font-normal text-muted-foreground">(optional)</span>}
-      </FieldLabel>
-      {children}
-      <FieldError id={`field-${name}-error`} className="text-xs">
-        {error}
-      </FieldError>
-    </Field>
-  );
-}
+const id = (field: FieldName) => `field-${field}`;
 
 export function EventForm({
+  form,
   draft,
-  fieldErrors,
   busy,
   focusField,
-  onUpdate,
-  onSubmit,
   onClose,
 }: {
+  form: EventFormApi;
+  // What the form opened with, to name the event being edited.
   draft: Draft;
-  fieldErrors: Partial<Record<FieldName, string>>;
   busy: boolean;
   focusField: FieldName;
-  onUpdate: (field: FieldName | "published", value: string | boolean | null) => void;
-  onSubmit: (event: FormEvent) => void;
   onClose: () => void;
 }) {
-  // What the form opened with, to tell a stray dismissal from abandoning real edits.
-  const [initial] = useState(draft);
+  // Tells a stray dismissal from abandoning real edits.
+  const edited = !useSelector(form.store, (state) => state.isDefaultValue);
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
-  const edited = JSON.stringify(draft) !== JSON.stringify(initial);
-  function fieldProps(field: FieldName) {
-    return {
-      id: `field-${field}`,
-      "aria-invalid": fieldErrors[field] ? true : undefined,
-      "aria-describedby": fieldErrors[field] ? `field-${field}-error` : undefined,
-    };
-  }
   return (
     // Nothing closes it while saving. The close button closes right away, like "Abbrechen";
     // Escape or a backdrop click only ask first once something was changed.
@@ -101,116 +64,161 @@ export function EventForm({
         initialFocus={() =>
           focusField !== "date" && matchMedia("(pointer: coarse)").matches
             ? document.querySelector<HTMLElement>("[data-slot=dialog-content]")
-            : document.getElementById(`field-${focusField}`)
+            : document.getElementById(id(focusField))
         }
         className="max-h-[calc(100dvh-2rem)] gap-0 overflow-y-auto bg-background p-7.5 max-md:px-4 max-md:py-5 sm:max-w-2xl"
       >
-        <form id="event-form" noValidate onSubmit={onSubmit}>
+        <form
+          id="event-form"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
           <DialogTitle className="pr-12 font-display text-[32px] leading-[1.03] font-bold tracking-[-.02em]">
             {draft.id ? "Termin bearbeiten" : "Ein neuer Grund zum Feiern."}
           </DialogTitle>
           {/* The list is hidden behind the scrim, so name the event being edited. */}
           {draft.id && (
-            <DialogDescription className="mt-2 text-[13px]">
-              {eventLabel(initial)}
-            </DialogDescription>
+            <DialogDescription className="mt-2 text-[13px]">{eventLabel(draft)}</DialogDescription>
           )}
           <FieldGroup className="mt-6.25 grid grid-cols-2 gap-5 max-md:gap-x-3 max-md:gap-y-4">
-            <EventField
-              name="host"
-              label="Verein"
-              optional
-              error={fieldErrors.host}
-              className="max-md:col-span-full"
-            >
-              <Input
-                {...fieldProps("host")}
-                maxLength={120}
-                value={draft.host ?? ""}
-                onChange={(e) => onUpdate("host", e.target.value || null)}
-                placeholder="z. B. KG Knallköpp"
-              />
-            </EventField>
-            <EventField
-              name="title"
-              label="Titel"
-              error={fieldErrors.title}
-              className="max-md:col-span-full"
-            >
-              <Input
-                {...fieldProps("title")}
-                required
-                maxLength={120}
-                value={draft.title}
-                onChange={(e) => onUpdate("title", e.target.value)}
-                placeholder="z. B. Biwak"
-              />
-            </EventField>
-            <EventField name="date" label="Datum" error={fieldErrors.date}>
-              <Input
-                {...fieldProps("date")}
-                type="date"
-                required
-                min={season.firstDay}
-                max={season.lastDay}
-                value={draft.date}
-                onChange={(e) => onUpdate("date", e.target.value)}
-              />
-            </EventField>
-            <EventField name="time" label="Uhrzeit" optional error={fieldErrors.time}>
-              <Input
-                {...fieldProps("time")}
-                type="time"
-                value={draft.time ?? ""}
-                onChange={(e) => onUpdate("time", e.target.value || null)}
-              />
-            </EventField>
-            <EventField
-              name="location"
-              label="Veranstaltungsort"
-              optional
-              error={fieldErrors.location}
-              className="col-span-full"
-            >
-              <Input
-                {...fieldProps("location")}
-                maxLength={180}
-                value={draft.location ?? ""}
-                onChange={(e) => onUpdate("location", e.target.value || null)}
-              />
-            </EventField>
-            <EventField
-              name="description"
-              label="Beschreibung"
-              optional
-              error={fieldErrors.description}
-              className="col-span-full"
-            >
-              <Textarea
-                {...fieldProps("description")}
-                rows={4}
-                maxLength={2000}
-                value={draft.description}
-                onChange={(e) => onUpdate("description", e.target.value)}
-                placeholder="Was erwartet die Jecken?"
-              />
-            </EventField>
-            <Field orientation="horizontal" className="col-span-full gap-2.5">
-              <Switch
-                id="field-published"
-                className="mt-0.5"
-                checked={draft.published}
-                onCheckedChange={(checked) => onUpdate("published", checked)}
-              />
-              <FieldContent>
-                <FieldLabel htmlFor="field-published" className="text-xs font-semibold">
-                  Termin veröffentlichen
-                </FieldLabel>
-                <FieldDescription className="text-xs">
-                  Nur veröffentlichte Termine erscheinen im öffentlichen Kalender.
-                </FieldDescription>
-              </FieldContent>
-            </Field>
+            <form.Field name="host">
+              {(field) => (
+                <FormField
+                  field={field}
+                  id={id("host")}
+                  label="Verein"
+                  optional
+                  className="max-md:col-span-full"
+                >
+                  {(control) => (
+                    <Input
+                      {...control}
+                      maxLength={120}
+                      value={field.state.value ?? ""}
+                      onChange={(e) => field.handleChange(e.target.value || null)}
+                      placeholder="z. B. KG Knallköpp"
+                    />
+                  )}
+                </FormField>
+              )}
+            </form.Field>
+            <form.Field name="title">
+              {(field) => (
+                <FormField
+                  field={field}
+                  id={id("title")}
+                  label="Titel"
+                  className="max-md:col-span-full"
+                >
+                  {(control) => (
+                    <Input
+                      {...control}
+                      required
+                      maxLength={120}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="z. B. Biwak"
+                    />
+                  )}
+                </FormField>
+              )}
+            </form.Field>
+            <form.Field name="date">
+              {(field) => (
+                <FormField field={field} id={id("date")} label="Datum">
+                  {(control) => (
+                    <Input
+                      {...control}
+                      type="date"
+                      required
+                      min={season.firstDay}
+                      max={season.lastDay}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  )}
+                </FormField>
+              )}
+            </form.Field>
+            <form.Field name="time">
+              {(field) => (
+                <FormField field={field} id={id("time")} label="Uhrzeit" optional>
+                  {(control) => (
+                    <Input
+                      {...control}
+                      type="time"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => field.handleChange(e.target.value || null)}
+                    />
+                  )}
+                </FormField>
+              )}
+            </form.Field>
+            <form.Field name="location">
+              {(field) => (
+                <FormField
+                  field={field}
+                  id={id("location")}
+                  label="Veranstaltungsort"
+                  optional
+                  className="col-span-full"
+                >
+                  {(control) => (
+                    <Input
+                      {...control}
+                      maxLength={180}
+                      value={field.state.value ?? ""}
+                      onChange={(e) => field.handleChange(e.target.value || null)}
+                    />
+                  )}
+                </FormField>
+              )}
+            </form.Field>
+            <form.Field name="description">
+              {(field) => (
+                <FormField
+                  field={field}
+                  id={id("description")}
+                  label="Beschreibung"
+                  optional
+                  className="col-span-full"
+                >
+                  {(control) => (
+                    <Textarea
+                      {...control}
+                      rows={4}
+                      maxLength={2000}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="Was erwartet die Jecken?"
+                    />
+                  )}
+                </FormField>
+              )}
+            </form.Field>
+            <form.Field name="published">
+              {(field) => (
+                <Field orientation="horizontal" className="col-span-full gap-2.5">
+                  <Switch
+                    id="field-published"
+                    className="mt-0.5"
+                    checked={field.state.value}
+                    onCheckedChange={(checked) => field.handleChange(checked)}
+                  />
+                  <FieldContent>
+                    <FieldLabel htmlFor="field-published" className="text-xs font-semibold">
+                      Termin veröffentlichen
+                    </FieldLabel>
+                    <FieldDescription className="text-xs">
+                      Nur veröffentlichte Termine erscheinen im öffentlichen Kalender.
+                    </FieldDescription>
+                  </FieldContent>
+                </Field>
+              )}
+            </form.Field>
           </FieldGroup>
           <div className="mt-6.5 flex flex-wrap gap-3">
             <Button type="submit" variant="default" size="default" disabled={busy} aria-busy={busy}>

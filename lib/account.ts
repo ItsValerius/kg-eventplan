@@ -24,6 +24,7 @@ export const inviteSchema = z.object({
     .max(80, "Der Name darf höchstens 80 Zeichen lang sein."),
   email,
 });
+export type InviteInput = z.infer<typeof inviteSchema>;
 
 export const newPasswordSchema = z
   .object({
@@ -33,6 +34,9 @@ export const newPasswordSchema = z
       .max(PASSWORD_MAX, `Das Passwort darf höchstens ${PASSWORD_MAX} Zeichen lang sein.`),
     repeat: z.string(),
   })
-  .refine((value) => value.password === value.repeat, "Die Passwörter stimmen nicht überein.");
+  .refine((value) => value.password === value.repeat, {
+    error: "Die Passwörter stimmen nicht überein.",
+    path: ["repeat"],
+  });
 
 export const adminIdSchema = z.object({ id: z.string().trim().min(1, "Der Zugang fehlt.") });

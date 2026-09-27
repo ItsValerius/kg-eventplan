@@ -2,17 +2,21 @@
 import { ArrowRight, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, type FormEvent, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { FieldDescription, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { emailSchema, newPasswordSchema, PASSWORD_MIN } from "@/lib/account";
-import { authClient } from "@/lib/auth-client";
-import { validationMessage } from "@/lib/events";
+import { useForgotPassword, useSetPassword } from "@/hooks/use-password-reset";
+import { PASSWORD_MIN } from "@/lib/account";
+import { FormField } from "./form-field";
 
-const failed = "Das hat nicht geklappt. Bitte versuche es erneut.";
+type Submittable = { handleSubmit: () => Promise<void> };
+const submitWith = (form: Submittable) => (event: React.FormEvent) => {
+  event.preventDefault();
+  form.handleSubmit();
+};
 
 function Card({
   title,
@@ -73,38 +77,14 @@ function BackToLogin() {
 
 // Requests a reset link. The answer is the same whether or not the address has an account.
 export function ForgotPassword() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const parsed = emailSchema.safeParse({ email });
-    if (!parsed.success) return setError(validationMessage(parsed.error));
-    setBusy(true);
-    setError("");
-    try {
-      const { error } = await authClient.requestPasswordReset({
-        email: parsed.data.email,
-        redirectTo: `${location.origin}/admin/passwort`,
-      });
-      if (error?.status === 429) setError("Zu viele Anfragen. Bitte warte eine Minute.");
-      else if (error) setError(failed);
-      else setSent(true);
-    } catch {
-      setError(failed);
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { form, error, done, busy } = useForgotPassword();
 
   return (
     <Card
       title="Passwort vergessen?"
       intro="Gib die E-Mail-Adresse deines Zugangs ein. Wir schicken dir einen Link, mit dem du ein neues Passwort festlegst."
     >
-      {sent ? (
+      {done ? (
         <Alert variant="success" role="status">
           <AlertDescription>
             Wenn es für diese Adresse einen Zugang gibt, ist der Link unterwegs. Er ist 24 Stunden
@@ -112,20 +92,23 @@ export function ForgotPassword() {
           </AlertDescription>
         </Alert>
       ) : (
-        <form noValidate onSubmit={submit}>
-          <Field>
-            <FieldLabel htmlFor="email" className="text-xs font-semibold">
-              E-Mail-Adresse
-            </FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="username"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Field>
+        <form noValidate onSubmit={submitWith(form)}>
+          <form.Field name="email">
+            {(field) => (
+              <FormField field={field} label="E-Mail-Adresse">
+                {(control) => (
+                  <Input
+                    {...control}
+                    type="email"
+                    autoComplete="username"
+                    required
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                )}
+              </FormField>
+            )}
+          </form.Field>
           <Submit busy={busy} label="Link anfordern" busyLabel="Wird gesendet …" />
           {error && <Problem>{error}</Problem>}
         </form>
@@ -139,35 +122,8 @@ export function ForgotPassword() {
 export function SetPassword() {
   const params = useSearchParams();
   const token = params.get("token");
-  const [password, setPassword] = useState("");
-  const [repeat, setRepeat] = useState("");
-  const [done, setDone] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-
   const expired = !token || params.get("error") === "INVALID_TOKEN";
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const parsed = newPasswordSchema.safeParse({ password, repeat });
-    if (!parsed.success) return setError(validationMessage(parsed.error));
-    setBusy(true);
-    setError("");
-    try {
-      const { error } = await authClient.resetPassword({
-        newPassword: parsed.data.password,
-        token: token!,
-      });
-      if (error?.code === "INVALID_TOKEN")
-        setError("Der Link ist abgelaufen oder wurde schon benutzt.");
-      else if (error) setError(failed);
-      else setDone(true);
-    } catch {
-      setError(failed);
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { form, error, done, busy } = useSetPassword(token ?? "");
 
   return (
     <Card title="Passwort festlegen" intro="Wähle ein Passwort für deinen Zugang zum Sessionsplan.">
@@ -189,38 +145,46 @@ export function SetPassword() {
           <BackToLogin />
         </>
       ) : (
-        <form noValidate onSubmit={submit}>
+        <form noValidate onSubmit={submitWith(form)}>
           <FieldGroup className="gap-4">
-            <Field>
-              <FieldLabel htmlFor="password" className="text-xs font-semibold">
-                Neues Passwort
-              </FieldLabel>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={PASSWORD_MIN}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <FieldDescription className="text-xs">
-                Mindestens {PASSWORD_MIN} Zeichen.
-              </FieldDescription>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="repeat" className="text-xs font-semibold">
-                Passwort wiederholen
-              </FieldLabel>
-              <Input
-                id="repeat"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={repeat}
-                onChange={(e) => setRepeat(e.target.value)}
-              />
-            </Field>
+            <form.Field name="password">
+              {(field) => (
+                <FormField field={field} label="Neues Passwort">
+                  {(control) => (
+                    <>
+                      <Input
+                        {...control}
+                        type="password"
+                        autoComplete="new-password"
+                        required
+                        minLength={PASSWORD_MIN}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                      <FieldDescription className="text-xs">
+                        Mindestens {PASSWORD_MIN} Zeichen.
+                      </FieldDescription>
+                    </>
+                  )}
+                </FormField>
+              )}
+            </form.Field>
+            <form.Field name="repeat">
+              {(field) => (
+                <FormField field={field} label="Passwort wiederholen">
+                  {(control) => (
+                    <Input
+                      {...control}
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  )}
+                </FormField>
+              )}
+            </form.Field>
           </FieldGroup>
           <Submit busy={busy} label="Passwort speichern" busyLabel="Wird gespeichert …" />
           {error && <Problem>{error}</Problem>}
