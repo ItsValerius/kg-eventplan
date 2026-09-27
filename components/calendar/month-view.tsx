@@ -95,9 +95,9 @@ export function MonthView({
               "font-display text-[27px] font-bold capitalize tracking-[-.02em] text-primary-dark",
             nav: "absolute inset-x-0 top-0 flex w-full items-center justify-between",
             button_previous:
-              "inline-flex size-11 items-center justify-center rounded-md p-0 text-primary hover:bg-muted disabled:cursor-default disabled:opacity-40",
+              "inline-flex size-11 items-center justify-center rounded-md p-0 text-primary hover:bg-muted aria-disabled:invisible",
             button_next:
-              "inline-flex size-11 items-center justify-center rounded-md p-0 text-primary hover:bg-muted disabled:cursor-default disabled:opacity-40",
+              "inline-flex size-11 items-center justify-center rounded-md p-0 text-primary hover:bg-muted aria-disabled:invisible",
             // On phones the month's events follow directly; the grid would push them below the fold.
             month_grid: "w-full table-fixed border-collapse max-md:hidden",
             weekdays: "flex",
