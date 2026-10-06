@@ -259,7 +259,7 @@ export function EventsTable({
                       date: "w-18",
                       // From lg the event column is capped and status takes the rest, so the
                       // switch sits near the titles instead of at the far edge.
-                      event: "lg:w-[34rem]",
+                      event: "lg:w-136",
                       published: "w-36 max-md:hidden lg:w-auto",
                       actions: "w-40 max-md:hidden",
                     }[header.id] +
@@ -301,7 +301,7 @@ export function EventsTable({
                     </span>
                   </TableCell>
                   <TableCell className="px-0 md:pr-5">
-                    <h3 className="text-base leading-[1.35] break-words hyphens-auto max-md:text-[15px]">
+                    <h3 className="text-base leading-[1.35] wrap-break-word hyphens-auto max-md:text-[15px]">
                       {eventName(event)}
                     </h3>
                     <p className="mt-1.5 max-w-[70ch] text-xs">

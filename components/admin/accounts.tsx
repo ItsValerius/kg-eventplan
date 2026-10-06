@@ -83,7 +83,7 @@ export function Accounts({
             >
               {/* A real basis, so the badge and buttons wrap below instead of squeezing the address. */}
               <div className="min-w-0 flex-[1_1_16rem]">
-                <p className="text-[15px] font-semibold break-words text-foreground">
+                <p className="text-[15px] font-semibold wrap-break-word text-foreground">
                   {account.name}
                   {self && <span className="font-normal text-muted-foreground"> (du)</span>}
                 </p>
