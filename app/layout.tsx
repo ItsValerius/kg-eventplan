@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: "/" },
+  // Search Console ownership; removing it unverifies the property.
+  verification: { google: "1yRwO21vlaOTOE1KRUQzk_DCseEy-P5UMHhV7sh7Jh0" },
   openGraph: {
     title,
     description,
