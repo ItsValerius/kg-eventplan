@@ -1,5 +1,5 @@
 import { useSelector } from "@tanstack/react-form";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
@@ -147,12 +147,34 @@ export function EventForm({
               {(field) => (
                 <FormField field={field} id={id("time")} label="Uhrzeit" optional>
                   {(control) => (
-                    <Input
-                      {...control}
-                      type="time"
-                      value={field.state.value ?? ""}
-                      onChange={(e) => field.handleChange(e.target.value || null)}
-                    />
+                    // Native time pickers on phones offer no way back to empty, hence the button.
+                    <div className="relative">
+                      <Input
+                        {...control}
+                        type="time"
+                        className="pr-11"
+                        value={field.state.value ?? ""}
+                        onChange={(e) => field.handleChange(e.target.value || null)}
+                      />
+                      {field.state.value && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          aria-label="Uhrzeit entfernen"
+                          className="absolute top-0.5 right-0.5 size-10.5 text-muted-foreground hover:text-foreground"
+                          onClick={() => {
+                            field.handleChange(null);
+                            // The button goes away, so keep focus in the form; on touch screens
+                            // that would reopen the picker.
+                            if (!matchMedia("(pointer: coarse)").matches)
+                              document.getElementById(id("time"))?.focus();
+                          }}
+                        >
+                          <X size={16} />
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </FormField>
               )}
