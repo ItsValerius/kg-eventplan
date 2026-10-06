@@ -21,6 +21,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Textarea } from "@/components/ui/textarea";
 import type { EventFormApi } from "@/hooks/use-event-form";
 import { eventLabel } from "@/lib/format";
@@ -148,33 +154,30 @@ export function EventForm({
                 <FormField field={field} id={id("time")} label="Uhrzeit" optional>
                   {(control) => (
                     // Native time pickers on phones offer no way back to empty, hence the button.
-                    <div className="relative">
-                      <Input
+                    <InputGroup>
+                      <InputGroupInput
                         {...control}
                         type="time"
-                        className="pr-11"
                         value={field.state.value ?? ""}
                         onChange={(e) => field.handleChange(e.target.value || null)}
                       />
                       {field.state.value && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          aria-label="Uhrzeit entfernen"
-                          className="absolute top-0.5 right-0.5 size-10.5 text-muted-foreground hover:text-foreground"
-                          onClick={() => {
-                            field.handleChange(null);
-                            // The button goes away, so keep focus in the form; on touch screens
-                            // that would reopen the picker.
-                            if (!matchMedia("(pointer: coarse)").matches)
-                              document.getElementById(id("time"))?.focus();
-                          }}
-                        >
-                          <X size={16} />
-                        </Button>
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupButton
+                            aria-label="Uhrzeit entfernen"
+                            onClick={() => {
+                              field.handleChange(null);
+                              // The button goes away, so keep focus in the form; on touch
+                              // screens that would reopen the picker.
+                              if (!matchMedia("(pointer: coarse)").matches)
+                                document.getElementById(id("time"))?.focus();
+                            }}
+                          >
+                            <X size={16} />
+                          </InputGroupButton>
+                        </InputGroupAddon>
                       )}
-                    </div>
+                    </InputGroup>
                   )}
                 </FormField>
               )}
