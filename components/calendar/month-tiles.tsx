@@ -17,8 +17,10 @@ export function MonthTiles({
 }) {
   useEffect(preloadCalendarWhenIdle, []);
   return (
+    // Without data-nosnippet Google quotes the tiles as "Oktober1. November6.".
     <div
       className="grid grid-cols-2 gap-2"
+      data-nosnippet
       role="group"
       aria-label="Termine nach Monat filtern"
       onPointerEnter={loadCalendar}

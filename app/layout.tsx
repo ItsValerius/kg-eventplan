@@ -12,7 +12,8 @@ const display = localFont({
   display: "swap",
 });
 const title = `Sessionsplan ${season.label} | Knallköpp Golkrath`;
-const description = `Alle Termine der KG Knallköpp Golkrath für die Karnevalssession ${season.label}.`;
+// The PDF is optional, so the description does not promise it.
+const description = `Der Sessionsplan der KG Knallköpp Golkrath e.V.: alle Termine der Karnevalssession ${season.label} mit Datum, Uhrzeit und Ort auf einen Blick.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
