@@ -3,6 +3,9 @@ import Link from "next/link";
 import { ClubAddress, LegalPage } from "@/components/legal-page";
 import { siteUrl } from "@/lib/seo/structured-data";
 
+// Public pages must stay fully static; the build fails if request-time work sneaks in.
+export const ensureStatic = "navigation";
+
 export const metadata: Metadata = {
   title: "Datenschutzerklärung | Knallköpp Golkrath",
   alternates: { canonical: "/datenschutz" },

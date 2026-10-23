@@ -94,10 +94,10 @@ pnpm format:check
 pnpm lint
 pnpm exec tsc --noEmit
 pnpm build --webpack
-pnpm test:persistence
+pnpm test
 ```
 
-The integration test uses the configured database and cleans up only its uniquely named test events. It verifies German Zod errors, Drizzle persistence, publication state, database constraints and simultaneous inserts. Run it locally after migrating; do not point it at production. The production build additionally verifies that the Server Actions and cache boundaries compile together.
+`pnpm test` includes the database tests (`tests/persistence.test.ts`, `tests/concurrency.test.ts`), so the database must be up and migrated. They use the configured database and clean up only their uniquely named test rows. They verify German Zod errors, Drizzle persistence, publication state, database constraints, simultaneous inserts and invitations, and that season plan PDFs are written one at a time. `.github/workflows/ci.yml` runs all of the above against a Postgres service on every push and pull request. Run it locally after migrating; do not point it at production. The production build additionally verifies that the Server Actions and cache boundaries compile together.
 
 ## Assets
 

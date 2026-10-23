@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ClubAddress, LegalPage } from "@/components/legal-page";
 import { club } from "@/lib/club";
 
+// Public pages must stay fully static; the build fails if request-time work sneaks in.
+export const ensureStatic = "navigation";
+
 export const metadata: Metadata = {
   title: "Impressum | Knallköpp Golkrath",
   alternates: { canonical: "/impressum" },
