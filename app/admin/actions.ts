@@ -9,6 +9,8 @@ import {
   createEvent,
   deleteEvent,
   readEvents,
+  readPublishedEvents,
+  serialisePdfWrite,
   setPublished,
   updateEvent,
 } from "@/lib/server/store";
@@ -28,15 +30,15 @@ const missingEvent = {
 // Refreshes the public page and regenerates the PDF, returning the admin's updated list.
 async function publishChanges() {
   updateTag(EVENTS_CACHE_TAG);
-  const events = await readEvents();
   try {
-    await regenerateSeasonPlanPdf(events.filter((event) => event.published));
+    // Reads inside the lock, so the last writer always renders the latest published events.
+    await serialisePdfWrite(async () => regenerateSeasonPlanPdf(await readPublishedEvents()));
   } catch (error) {
     console.error("Sessionsplan-PDF konnte nicht aktualisiert werden:", error);
   }
   // Again after the upload, so a request made during it can't cache a missing PDF.
   updateTag(EVENTS_CACHE_TAG);
-  return { ok: true as const, events };
+  return { ok: true as const, events: await readEvents() };
 }
 
 export async function saveEventAction(input: unknown) {

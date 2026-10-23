@@ -9,7 +9,8 @@ import { sql } from "drizzle-orm";
 import { migrate as applyMigrations } from "drizzle-orm/node-postgres/migrator";
 import { connect, type Database } from "../db/client";
 import { events } from "../db/schema";
-import { initialEvents, validateEvent, type ClubEvent } from "../lib/events";
+import type { ClubEvent } from "../lib/events";
+import { initialEvents, validateEvent } from "./seed-events";
 
 for (const file of [".env.local", ".env"]) {
   if (existsSync(file)) process.loadEnvFile(file);

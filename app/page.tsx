@@ -6,6 +6,9 @@ import { readPublicEvents, renderDay, sessionPlanPdf } from "@/lib/server/public
 import { Suspense } from "react";
 import { eventsJsonLd } from "@/lib/seo/structured-data";
 
+// Public pages must stay fully static; the build fails if request-time work sneaks in.
+export const ensureStatic = "navigation";
+
 export default async function Home() {
   const [events, pdf, renderedOn] = await Promise.all([
     readPublicEvents(),

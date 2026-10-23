@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: kg_eventplan
+          POSTGRES_PASSWORD: local-development-only
+          POSTGRES_DB: kg_eventplan
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U kg_eventplan -d kg_eventplan"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://kg_eventplan:local-development-only@127.0.0.1:5433/kg_eventplan
+      BETTER_AUTH_SECRET: ci-only-not-a-secret-ci-only-not-a-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm db:migrate
+      - run: pnpm test
+      - run: pnpm build

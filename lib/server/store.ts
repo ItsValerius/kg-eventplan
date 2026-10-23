@@ -23,6 +23,15 @@ export async function readEvents(): Promise<ClubEvent[]> {
     .orderBy(asc(events.date), asc(events.time), asc(events.id));
 }
 
+// Runs write while holding a database lock, so concurrent saves regenerate the PDF one
+// after another and an older snapshot can't overwrite a newer one.
+export async function serialisePdfWrite(write: () => Promise<void>) {
+  await database().transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(20262028)`);
+    await write();
+  });
+}
+
 export async function readPublishedEvents(): Promise<ClubEvent[]> {
   return database()
     .select(eventFields)
